@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		6977875D1C288AF800CB13AF /* libstdc++.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 6977875C1C288AF800CB13AF /* libstdc++.tbd */; };
 		6977875F1C288B0500CB13AF /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6977875E1C288B0500CB13AF /* SystemConfiguration.framework */; };
 		697787611C288B1B00CB13AF /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 697787601C288B1B00CB13AF /* CoreMotion.framework */; };
 		69F276901C29CAF8009A7126 /* LandingTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 69F2768F1C29CAF8009A7126 /* LandingTableViewController.m */; };
@@ -18,14 +17,12 @@
 		69F4FBFE1C28827300FB6DA7 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 69F4FBFD1C28827300FB6DA7 /* AppDelegate.m */; };
 		69F4FC041C28827300FB6DA7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 69F4FC021C28827300FB6DA7 /* Main.storyboard */; };
 		69F4FC091C28827300FB6DA7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 69F4FC071C28827300FB6DA7 /* LaunchScreen.storyboard */; };
-		69F4FC331C28862E00FB6DA7 /* libz.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = 69F4FC321C28862E00FB6DA7 /* libz.tbd */; };
 		CB2A2E541E7BE46400E5D9AC /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CB2A2E531E7BE46400E5D9AC /* Images.xcassets */; };
 		F2CE80A6706659047612E5DC /* Pods_TLKitExample.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FBA99DD464C6232FA0E41124 /* Pods_TLKitExample.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		288780D36DEB91D2F2E67244 /* Pods-TLKitExample.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TLKitExample.debug.xcconfig"; path = "Pods/Target Support Files/Pods-TLKitExample/Pods-TLKitExample.debug.xcconfig"; sourceTree = "<group>"; };
-		6977875C1C288AF800CB13AF /* libstdc++.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = "libstdc++.tbd"; path = "usr/lib/libstdc++.tbd"; sourceTree = SDKROOT; };
 		6977875E1C288B0500CB13AF /* SystemConfiguration.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SystemConfiguration.framework; path = System/Library/Frameworks/SystemConfiguration.framework; sourceTree = SDKROOT; };
 		697787601C288B1B00CB13AF /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = System/Library/Frameworks/CoreMotion.framework; sourceTree = SDKROOT; };
 		69F2768E1C29CAF8009A7126 /* LandingTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LandingTableViewController.h; sourceTree = "<group>"; };
@@ -43,7 +40,6 @@
 		69F4FC031C28827300FB6DA7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		69F4FC081C28827300FB6DA7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		69F4FC0A1C28827300FB6DA7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		69F4FC321C28862E00FB6DA7 /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		91CDCFF3241EEF3CA24AFC0C /* Pods-TLKitExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TLKitExample.release.xcconfig"; path = "Pods/Target Support Files/Pods-TLKitExample/Pods-TLKitExample.release.xcconfig"; sourceTree = "<group>"; };
 		CB2A2E531E7BE46400E5D9AC /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
 		FBA99DD464C6232FA0E41124 /* Pods_TLKitExample.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_TLKitExample.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -56,8 +52,6 @@
 			files = (
 				697787611C288B1B00CB13AF /* CoreMotion.framework in Frameworks */,
 				6977875F1C288B0500CB13AF /* SystemConfiguration.framework in Frameworks */,
-				6977875D1C288AF800CB13AF /* libstdc++.tbd in Frameworks */,
-				69F4FC331C28862E00FB6DA7 /* libz.tbd in Frameworks */,
 				F2CE80A6706659047612E5DC /* Pods_TLKitExample.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -79,8 +73,6 @@
 			children = (
 				697787601C288B1B00CB13AF /* CoreMotion.framework */,
 				6977875E1C288B0500CB13AF /* SystemConfiguration.framework */,
-				6977875C1C288AF800CB13AF /* libstdc++.tbd */,
-				69F4FC321C28862E00FB6DA7 /* libz.tbd */,
 				FBA99DD464C6232FA0E41124 /* Pods_TLKitExample.framework */,
 			);
 			name = Frameworks;
@@ -138,8 +130,8 @@
 			children = (
 				69F4FBFC1C28827300FB6DA7 /* AppDelegate.h */,
 				69F4FBFD1C28827300FB6DA7 /* AppDelegate.m */,
-				69F4FC021C28827300FB6DA7 /* Main.storyboard */,
 				69F4FC071C28827300FB6DA7 /* LaunchScreen.storyboard */,
+				69F4FC021C28827300FB6DA7 /* Main.storyboard */,
 				69F2768E1C29CAF8009A7126 /* LandingTableViewController.h */,
 				69F2768F1C29CAF8009A7126 /* LandingTableViewController.m */,
 				69F276991C29D7F7009A7126 /* TLKit Features */,
@@ -407,12 +399,10 @@
 			baseConfigurationReference = 288780D36DEB91D2F2E67244 /* Pods-TLKitExample.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				DEVELOPMENT_TEAM = 982658W9N5;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"../**",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/TLKitExample/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -426,12 +416,10 @@
 			baseConfigurationReference = 91CDCFF3241EEF3CA24AFC0C /* Pods-TLKitExample.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				ASSETCATALOG_COMPILER_LAUNCHIMAGE_NAME = LaunchImage;
 				DEVELOPMENT_TEAM = 982658W9N5;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(PROJECT_DIR)",
-					"../**",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/TLKitExample/Info.plist";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";

@@ -20,20 +20,11 @@
  ******************************************************************************/
 
 #import "AppDelegate.h"
-#import <TLKit/CKContextKit.h>
-#import <CoreLocation/CoreLocation.h>
-
-@interface AppDelegate () <CLLocationManagerDelegate>
-@property (nonatomic) CLLocationManager *clLocationManager;
-@end
 
 @implementation AppDelegate
 
-
-- (BOOL)application:(UIApplication *)application
-        didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
-
     return YES;
 }
 

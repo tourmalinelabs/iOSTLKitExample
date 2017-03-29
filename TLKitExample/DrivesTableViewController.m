@@ -24,113 +24,114 @@
 #import <TLKit/CKActivityEvent.h>
 #import <TLKit/CKDrive.h>
 
+@import SVProgressHUD;
+
 @interface DrivesTableViewController ()
-@property(strong, nonatomic) IBOutlet UIBarButtonItem *stopButton;
-@property(nonatomic) CKActivityManager *actMgr;
-@property(nonatomic) NSArray *dataSource;
+@property (strong, nonatomic) CKActivityManager  *activityManager;
+@property (strong, nonatomic) NSArray<CKDrive *> *drives;
+- (IBAction)onBarButtonItemStop:(id)sender;
+- (void)startDriveMonitoring;
+- (void)stopDriveMonitoring;
+- (void)queryDrives;
 @end
 
 @implementation DrivesTableViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-
-    // UI Code
-    self.navigationItem.title = @"Drives";
-    self.navigationItem.rightBarButtonItem = self.stopButton;
-
-    // Init CK Activity Manager
-    self.actMgr = [CKActivityManager new];
-
-    // Update the Data Source (to update the UI)
-    [self updateDataSource];
-
-    // Register Listener to get drive event updates
-    [self registerDriveListener];
+    
+    // holds the drives
+    self.drives = @[];
+    
+    // starts drive monitoring
+    [self startDriveMonitoring];
+    
+    // query the drives
+    [self queryDrives];
 }
 
-- (void)updateDataSource {
-    // Query for all drives
-    __weak DrivesTableViewController *weakSelf = self;
-    [self.actMgr queryDrivesFromDate:[NSDate distantPast]
-                              toDate:[NSDate distantFuture]
-                           withLimit:INT32_MAX
-                             toQueue:dispatch_get_main_queue()
-                         withHandler:^(NSArray *drives, NSError *error) {
-                             if (error) {
-                                 NSLog(@"Drive query error: %@", error);
-                                 return;
-                             }
-
-                             NSLog(@"Drive query result");
-                             for (id drive in drives) {
-                                 NSLog(@"    %@", drive);
-                             }
-
-                             //Set data source and refresh the TableView
-                             weakSelf.dataSource = drives;
-                             [weakSelf.tableView reloadData];
-                         }];
-
-    // Query for single drive
-    NSUUID *driveId = nil;
-    [self.actMgr queryDriveById:driveId
-                        toQueue:dispatch_get_main_queue()
-                    withHandler:^(NSArray *drives, NSError *error) {
-                        if (error) {
-                            NSLog(@"Drive query error: %@", error);
-                            return;
-                        }
-
-                        if (drives.count) {
-                            NSLog(@"Found drive: %@", [drives firstObject]);
-                        }
-                    }];
+- (void)dealloc {
+    // stop drive mpnitoring
+    [self stopDriveMonitoring];
+    // dismiss progress i needed
+    [SVProgressHUD dismiss];
 }
 
-- (void)registerDriveListener {
-    NSLog(@"Listening for new drive events...");
-    __weak DrivesTableViewController *weakSelf = self;
-    [self.actMgr
-        startDriveMonitoringToQueue:dispatch_get_main_queue()
-                        withHandler:^(CKActivityEvent *evt, NSError * err) {
-                            // Update UI
-                            [weakSelf updateDataSource];
-                            NSLog(@"Drive event: %@", evt);
-                        }];
+- (IBAction)onBarButtonItemStop:(id)sender {
+    [self stopDriveMonitoring];
 }
 
-- (IBAction)stopDriveButtonPressed:(id)sender {
-    // Stop Drive Monitoring
-    [self.actMgr stopDriveMonitoring];
-    NSLog(@"Stopped Drive monitoring");
+- (void)startDriveMonitoring {
+    
+    // initialize CKActivityManager
+    NSLog(@"<< Initializing Activity Manager >>");
+    self.activityManager = CKActivityManager.new;
+    
+    // start drive monitoring
+    NSLog(@"<< Starting Drive Monitoring >>");
+    __weak __typeof__(self) weakSelf = self;
+    [self.activityManager startDriveMonitoringToQueue:dispatch_get_main_queue()
+                                          withHandler:^(CKActivityEvent * _Nullable evt, NSError * _Nullable error) {
+                                              // handle error
+                                              if (error) {
+                                                  NSLog(@"Failed to start drive monitoring with error: %@", error);
+                                                  return;
+                                              }
+                                              NSLog(@"New CKActivityEvent: %@", evt);
+                                              
+                                              if (!weakSelf) return;
+                                              
+                                              // update the drives once the activity is finalized
+                                              if (evt.type == CKActivityEventFinalized) {
+                                                  [weakSelf queryDrives];
+                                              }
+                                          }];
+}
+
+- (void)stopDriveMonitoring {
+    // stop Drive Monitoring
+    [self.activityManager stopDriveMonitoring];
+    NSLog(@"<< Stopped Drive monitoring >>");
+}
+
+- (void)queryDrives {
+    // show progress
+    [SVProgressHUD show];
+    
+    __weak __typeof__(self) weakSelf = self;
+    // query drives since last week with a limit of max 50 results
+    [self.activityManager queryDrivesFromDate:[NSDate.date dateByAddingTimeInterval:-7*24*60*60]
+                                       toDate:NSDate.distantFuture
+                                    withLimit:50
+                                      toQueue:dispatch_get_main_queue()
+                                  withHandler:^(NSArray<__kindof CKActivity *> * _Nullable activities, NSError * _Nullable err) {
+                                      [SVProgressHUD dismiss];
+                                      
+                                      if (err) {
+                                          NSLog(@"Query Drives failed with error: %@", err);
+                                          return;
+                                      }
+                                      
+                                      NSLog(@"Query Drives result: %@", activities);
+                                      if (!weakSelf) return;
+                                      
+                                      // updates the ui
+                                      weakSelf.drives = activities;
+                                      [weakSelf.tableView reloadData];
+                                  }];
 }
 
 #pragma mark - TableView DataSource
 
-- (NSInteger)tableView:(UITableView *)tableView
- numberOfRowsInSection:(NSInteger)section {
-    return self.dataSource.count;
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return self.drives.count;
 }
 
-- (UITableViewCell *)tableView:(UITableView *)tableView
-         cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UITableViewCell *cell =
-        [tableView dequeueReusableCellWithIdentifier:@"cell"
-                                        forIndexPath:indexPath];
-
-    CKDrive *drive = self.dataSource[indexPath.row];
-
-    cell.textLabel.text = [drive description];
-
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    static NSString *cellIdentifier = @"cell";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier forIndexPath:indexPath];
+    cell.textLabel.text = self.drives[indexPath.row].description;
     return cell;
-}
-
-#pragma mark - TableView delegate
-
-- (void)      tableView:(UITableView *)tableView
-didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
 @end

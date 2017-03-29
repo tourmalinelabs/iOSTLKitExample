@@ -8,4 +8,5 @@ target 'TLKitExample' do
   use_frameworks!
   
   pod 'TLKit'
+  pod 'SVProgressHUD'
 end
