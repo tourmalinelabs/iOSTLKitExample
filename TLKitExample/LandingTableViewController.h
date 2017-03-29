@@ -22,5 +22,5 @@
 #import <UIKit/UIKit.h>
 
 @interface LandingTableViewController : UITableViewController
-@property (assign, nonatomic)NSDictionary* launcOptions;
+
 @end

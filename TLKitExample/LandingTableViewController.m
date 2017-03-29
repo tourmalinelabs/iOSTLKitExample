@@ -25,14 +25,14 @@
 #import <TLKit/CKAuthenticationManagerDelegate.h>
 #import <TLKit/CKDefaultAuth.h>
 
+// API Key usually should be kept on server.
+static NSString *const API_KEY  = @"bdf760a8dbf64e35832c47d8d8dffcc0";
+
 // Pre-registered user and password.
 static NSString *const USERNAME = @"example@tourmalinelabs.com";
 static NSString *const PASSWORD = @"password";
 
-// API Key usually should be kept on server.
-static NSString *const API_KEY  = @"bdf760a8dbf64e35832c47d8d8dffcc0";
-
-@interface LandingTableViewController () <CLLocationManagerDelegate, CKAuthenticationManagerDelegate>
+@interface LandingTableViewController () <CLLocationManagerDelegate>
 @property (nonatomic) CLLocationManager *clLocationManager;
 @end
 
@@ -40,47 +40,70 @@ static NSString *const API_KEY  = @"bdf760a8dbf64e35832c47d8d8dffcc0";
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    if (![CKContextKit isInitialized]) {
-
-        [CKContextKit initWithApiKey:@"bdf760a8dbf64e35832c47d8d8dffcc0"
-                             authMgr:[[CKDefaultAuth alloc]
-                                 initWithApiKey:API_KEY
-                                         userId:USERNAME
-                                           pass:PASSWORD]
+    
+    // Is the engine already started ?
+    if (!CKContextKit.isInitialized) {
+        
+        // Initializes the engine with the test account
+        [CKContextKit initWithApiKey:API_KEY
+                             authMgr:[[CKDefaultAuth alloc] initWithApiKey:API_KEY userId:USERNAME pass:PASSWORD]
                        launchOptions:nil
                    withResultToQueue:dispatch_get_main_queue()
                          withHandler:^(BOOL successful, NSError *error) {
                              if (error) {
-                                 NSLog(@"Failed to start TLKit with error: %@",
-                                     error);
+                                 NSLog(@"Failed to start TLKit with error: %@", error);
                                  return;
                              }
                          }];
     }
 }
 
-#pragma mark - TableViewDataSource
+#pragma mark - UITableViewDataSource
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    if ([CLLocationManager authorizationStatus] != kCLAuthorizationStatusAuthorizedAlways) {
+    if (CLLocationManager.authorizationStatus != kCLAuthorizationStatusAuthorizedAlways) {
         return 1;
     }
     return 2;
 }
 
-#pragma mark - TableViewDelegate
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    
+    UITableViewCell *cell = [super tableView:tableView cellForRowAtIndexPath:indexPath];
+    if (indexPath.section == 0 && indexPath.row == 0) {
+        switch (CLLocationManager.authorizationStatus) {
+            case kCLAuthorizationStatusNotDetermined: {
+                cell.textLabel.text = @"Request Location Authorization";
+                break;
+            }
+            case kCLAuthorizationStatusAuthorizedAlways: {
+                cell.textLabel.text = @"Authorized Always";
+                break;
+            }
+            case kCLAuthorizationStatusDenied: {
+                cell.textLabel.text = @"Not Authorized";
+                break;
+            }
+            default:
+                break;
+        }
+    }
+    return cell;
+}
 
-- (void)tableView:(UITableView *)tableView
-        didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+#pragma mark - UITableViewDelegate
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     
     switch (indexPath.section) {
-        case 0:
+        case 0: {
             if (indexPath.row == 0) {
                 [self requestLocationPermissions];
             }
             break;
-        case 1:
+        }
+        case 1: {
             if (indexPath.row == 0) {
                 CKContextKit.isMonitoring = YES;
                 [self performSegueWithIdentifier:@"FeaturesSegue" sender:nil];
@@ -88,17 +111,20 @@ static NSString *const API_KEY  = @"bdf760a8dbf64e35832c47d8d8dffcc0";
                 CKContextKit.isMonitoring = NO;
             }
             break;
+        }
         default:
             break;
     }
 }
 
 - (void)requestLocationPermissions {
-    // Request "Always" Location permissions
-    self.clLocationManager = [CLLocationManager new];
-    self.clLocationManager.delegate = self;
     
-    if ([CLLocationManager authorizationStatus] == kCLAuthorizationStatusNotDetermined) {
+    if (CLLocationManager.authorizationStatus == kCLAuthorizationStatusNotDetermined) {
+        
+        // Request "Always" Location permissions
+        self.clLocationManager = CLLocationManager.new;
+        self.clLocationManager.delegate = self;
+
         if ([self.clLocationManager respondsToSelector:@selector(requestAlwaysAuthorization)]) {
             [self.clLocationManager requestAlwaysAuthorization];
         } else {
@@ -112,72 +138,5 @@ static NSString *const API_KEY  = @"bdf760a8dbf64e35832c47d8d8dffcc0";
 - (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
     [self.tableView reloadData];
 }
-
-// Note: here we call the BW server directly and authenticate against it.
-// in production code this would call the application server which would in
-// turn authenticate against the BW server.
-- (void)getToken:(AuthenticationHandler)handler {
-
-    NSURL* url = [ NSURL URLWithString:@"https://bw.api.tl/v1/identity-login" ];
-
-
-    NSURLSession *session =
-            [NSURLSession sessionWithConfiguration:NSURLSessionConfiguration.defaultSessionConfiguration];
-    NSMutableURLRequest *request =
-            [[NSMutableURLRequest alloc] initWithURL: url];
-
-    [request setValue:@"application/json" forHTTPHeaderField:@"Content-Type"];
-    [request setValue:API_KEY forHTTPHeaderField:@"api-key"];
-    request.HTTPMethod = @"POST";
-    request.HTTPBody =
-            [NSJSONSerialization
-                    dataWithJSONObject:@{ @"username" : USERNAME,
-                                          @"password" : PASSWORD }
-                               options:0
-                                 error:nil];
-
-    NSURLSessionDataTask *dataTask =
-            [session dataTaskWithRequest:request
-                       completionHandler: ^(NSData * _Nullable data, NSURLResponse * _Nullable response, NSError * _Nullable error) {
-
-                           NSHTTPURLResponse *rsp = (NSHTTPURLResponse *)response;
-                           NSLog(@"Got repsonse: %lu", rsp.statusCode);
-                           if( rsp.statusCode != 200 ) {
-                               handler(@"",@"");
-                               return;
-                           }
-                           NSDictionary *json = [NSJSONSerialization JSONObjectWithData:data
-                                                                                options:0
-                                                                                  error:nil];
-                           NSString* authToken = json[@"accessToken"];
-                           if( authToken ) {
-                               NSLog(@"Got auth token %@", authToken);
-                               handler( USERNAME, authToken );
-                           } else {
-                               handler(@"", @"");
-                           }
-                           return;
-                       }];
-    [dataTask resume];
-}
-
-#pragma mark - CKAuthenticationManagerDelegate
-- (void)retrieveToken:(AuthenticationHandler)handler {
-    // Note: an optimization here would be to cache a previously retrieved token
-    // and return it first instead of getting a new token every time.
-    // If the cached token is invalid onInvalidToken would be called and a new
-    // token could be retrieved.
-
-    [self getToken:handler];
-}
-
-- (void)onInvalidToken:(int)errCode newTokenCb:(AuthenticationHandler)handler {
-    [self getToken:handler];
-}
-
-- (NSString *)userId {
-    return USERNAME;
-}
-
 
 @end

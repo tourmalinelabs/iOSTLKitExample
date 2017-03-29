@@ -2,12 +2,9 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "group:/Users/ehall/tourmaline/sdk_release/iOSTLKitExample/TLKitExample.xcodeproj">
+      location = "group:TLKitExample.xcodeproj">
    </FileRef>
    <FileRef
       location = "group:Pods/Pods.xcodeproj">
-   </FileRef>
-   <FileRef
-      location = "group:TLKitExample.xcodeproj">
    </FileRef>
 </Workspace>

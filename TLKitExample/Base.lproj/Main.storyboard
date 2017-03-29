@@ -1,10 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16C67" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="sVE-97-FSl">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="11762" systemVersion="16D32" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="sVE-97-FSl">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
-        <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="11757"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -92,10 +91,10 @@
             </objects>
             <point key="canvasLocation" x="820" y="1105"/>
         </scene>
-        <!--Features Table View Controller-->
+        <!--Features-->
         <scene sceneID="AnM-B4-6Tq">
             <objects>
-                <tableViewController id="civ-qK-QbF" customClass="FeaturesTableViewController" sceneMemberID="viewController">
+                <tableViewController title="Features" id="civ-qK-QbF" customClass="FeaturesTableViewController" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="static" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="18" sectionFooterHeight="18" id="yn1-9m-FkN">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -119,6 +118,9 @@
                                                 </label>
                                             </subviews>
                                         </tableViewCellContentView>
+                                        <connections>
+                                            <segue destination="8Bp-J7-Slg" kind="show" id="rGX-u6-oE0"/>
+                                        </connections>
                                     </tableViewCell>
                                 </cells>
                             </tableViewSection>
@@ -140,6 +142,9 @@
                                                 </label>
                                             </subviews>
                                         </tableViewCellContentView>
+                                        <connections>
+                                            <segue destination="akr-go-PFC" kind="show" id="FqI-lO-vdq"/>
+                                        </connections>
                                     </tableViewCell>
                                 </cells>
                             </tableViewSection>
@@ -149,20 +154,16 @@
                             <outlet property="delegate" destination="civ-qK-QbF" id="Vr5-k9-w2d"/>
                         </connections>
                     </tableView>
-                    <connections>
-                        <segue destination="8Bp-J7-Slg" kind="show" identifier="DrivesSegue" id="vzB-wp-zZ8"/>
-                        <segue destination="akr-go-PFC" kind="show" identifier="LocationsSegue" id="uIF-Z0-pmP"/>
-                    </connections>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dfj-Qw-p0j" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
             <point key="canvasLocation" x="1514" y="1105"/>
         </scene>
-        <!--Drives Table View Controller-->
+        <!--Drives-->
         <scene sceneID="IDl-SE-c03">
             <objects>
                 <tableViewController id="8Bp-J7-Slg" customClass="DrivesTableViewController" sceneMemberID="viewController">
-                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="88" sectionHeaderHeight="28" sectionFooterHeight="28" id="3SW-Ei-lsT">
+                    <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" allowsSelection="NO" rowHeight="88" sectionHeaderHeight="28" sectionFooterHeight="28" id="3SW-Ei-lsT">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -190,20 +191,21 @@
                             <outlet property="delegate" destination="8Bp-J7-Slg" id="faY-cT-9nx"/>
                         </connections>
                     </tableView>
-                    <connections>
-                        <outlet property="stopButton" destination="HPm-rK-AwL" id="x9U-ai-tWj"/>
-                    </connections>
+                    <toolbarItems/>
+                    <navigationItem key="navigationItem" title="Drives" id="8yj-fR-se2">
+                        <barButtonItem key="rightBarButtonItem" title="Stop" id="UOb-WI-Ypd">
+                            <connections>
+                                <action selector="onBarButtonItemStop:" destination="8Bp-J7-Slg" id="4LC-ea-X59"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
+                    <simulatedToolbarMetrics key="simulatedBottomBarMetrics"/>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="0o0-Cc-KPO" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <barButtonItem title="Stop" style="done" id="HPm-rK-AwL">
-                    <connections>
-                        <action selector="stopDriveButtonPressed:" destination="8Bp-J7-Slg" id="eqK-zl-5Q1"/>
-                    </connections>
-                </barButtonItem>
             </objects>
-            <point key="canvasLocation" x="2228" y="455"/>
+            <point key="canvasLocation" x="2302" y="759"/>
         </scene>
-        <!--Locations Table View Controller-->
+        <!--Locations-->
         <scene sceneID="tXL-m8-YMk">
             <objects>
                 <tableViewController id="akr-go-PFC" customClass="LocationsTableViewController" sceneMemberID="viewController">
@@ -235,27 +237,28 @@
                             <outlet property="delegate" destination="akr-go-PFC" id="Rg6-a3-CZq"/>
                         </connections>
                     </tableView>
-                    <connections>
-                        <outlet property="stopButton" destination="PfW-XC-jaw" id="a9N-FY-hsZ"/>
-                    </connections>
+                    <navigationItem key="navigationItem" title="Locations" id="T4t-4w-2Z0">
+                        <barButtonItem key="rightBarButtonItem" title="Stop" id="xpB-uh-Qih">
+                            <connections>
+                                <action selector="onBarButtonItemStop:" destination="akr-go-PFC" id="Uap-GD-L39"/>
+                            </connections>
+                        </barButtonItem>
+                    </navigationItem>
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="gIr-3a-2QR" userLabel="First Responder" sceneMemberID="firstResponder"/>
-                <barButtonItem title="Stop" style="done" id="PfW-XC-jaw">
-                    <connections>
-                        <action selector="stopButtonPressed:" destination="akr-go-PFC" id="U1y-gT-cBp"/>
-                    </connections>
-                </barButtonItem>
             </objects>
-            <point key="canvasLocation" x="2228" y="1766"/>
+            <point key="canvasLocation" x="2302" y="1462"/>
         </scene>
         <!--Navigation Controller-->
         <scene sceneID="dVC-0s-q4v">
             <objects>
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="sVE-97-FSl" sceneMemberID="viewController">
                     <toolbarItems/>
-                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="XFA-FI-P4L">
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" barStyle="black" id="XFA-FI-P4L">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
+                        <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                        <color key="barTintColor" red="0.94901960784313721" green="0.53725490196078429" blue="0.0078431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
                     <connections>

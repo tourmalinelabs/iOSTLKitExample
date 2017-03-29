@@ -23,10 +23,15 @@
 #import <TLKit/CKLocationManager.h>
 #import <TLKit/CKLocation.h>
 
+@import SVProgressHUD;
+
 @interface LocationsTableViewController ()
-@property(nonatomic) CKLocationManager *locationManager;
-@property(nonatomic) NSArray *dataSource;
-@property(strong, nonatomic) IBOutlet UIBarButtonItem *stopButton;
+@property(nonatomic) CKLocationManager     *locationManager;
+@property(nonatomic) NSArray<CKLocation *> *locations;
+- (IBAction)onBarButtonItemStop:(id)sender;
+- (void)startLocationsMonitoring;
+- (void)stopLocationsMonitoring;
+- (void)queryLocations;
 @end
 
 @implementation LocationsTableViewController
@@ -34,70 +39,93 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
 
-    // UI Code
-    self.navigationItem.title = @"Locations";
-    self.navigationItem.rightBarButtonItem = self.stopButton;
+    // hold the locations
+    self.locations = @[];
+    
+    // start monitoring locations
+    [self startLocationsMonitoring];
 
-    // Init CK Location Manager
-    self.locationManager = [CKLocationManager new];
-
-    // Update the Data Source (to update the UI)
-    [self updateDataSource];
+    // query locations
+    [self queryLocations];
 }
 
-- (void)updateDataSource {
-    __weak LocationsTableViewController *weakSelf = self;
-
-    // Query last 50 locations
-    [self.locationManager
-        queryLocationsFromDate:[NSDate distantPast]
-                        toDate:[NSDate distantFuture]
-                     withLimit:50
-                       toQueue:dispatch_get_main_queue()
-                   withHandler:^(NSArray *locations,
-                       NSError *err) {
-                       NSLog(@"Locations Query Result:");
-                       for (id location in locations) {
-                           NSLog(@"    %@", location);
-                       }
-
-                       weakSelf.dataSource = locations;
-                       [weakSelf.tableView reloadData];
-                   }];
+- (void)dealloc {
+    // stop monitoring locations
+    [self stopLocationsMonitoring];
+    // dimiss progress if needed
+    [SVProgressHUD dismiss];
 }
 
-- (IBAction)stopButtonPressed:(id)sender {
-    // Unregisters locations listener, stops updating locations
-    // Crashes on ver. 1.3-16010500 of CK
-//    [self.locationManager stopUpdatingLocation];
-    NSLog(@"Stopped Location Update Monitoring");
+- (IBAction)onBarButtonItemStop:(id __unused)sender {
+    [self stopLocationsMonitoring];
+}
+
+- (void)startLocationsMonitoring {
+    
+    // Instantiates CKLocationManager
+    NSLog(@"<< Initializing Location Manager >>");
+    self.locationManager = CKLocationManager.new;
+    
+    // Starts monitoring Locations
+    NSLog(@"<< Starting Location Monitoring >>");
+    [self.locationManager startUpdatingLocationsToQueue:dispatch_get_main_queue()
+                                            withHandler:^(CKLocation * _Nonnull location) {
+                                                NSLog(@"Location Update: %@", location);
+                                            } completion:^(BOOL successful, NSError * _Nullable error) {
+                                                if (error) {
+                                                    NSLog(@"Failed to start location monitoring with error: %@", error);
+                                                    return;
+                                                }
+                                                NSLog(@"<< Started Location Monitoring >>");
+                                            }];
+}
+
+- (void)stopLocationsMonitoring {
+    // stop location monitoring
+    [self.locationManager stopUpdatingLocation];
+    NSLog(@"<< Stopped Location monitoring >>");
+}
+
+- (void)queryLocations {
+    // shows progress
+    [SVProgressHUD show];
+    
+    __weak __typeof__(self) weakSelf = self;
+    // query locations since last week with a limit of max 50 results
+    [self.locationManager queryLocationsFromDate:[NSDate.date dateByAddingTimeInterval:-7*24*60*60]
+                                          toDate:NSDate.distantFuture
+                                       withLimit:50
+                                         toQueue:dispatch_get_main_queue()
+                                     withHandler:^(NSArray<CKLocation *> * _Nullable locations, NSError * _Nullable err) {
+                                         // dismiss progress
+                                         [SVProgressHUD dismiss];
+                                         
+                                         // handle error
+                                         if (err) {
+                                             NSLog(@"Query Locations failed with error: %@", err);
+                                             return;
+                                         }
+                                         NSLog(@"Query Locations result: %@", locations);
+                                         
+                                         if (!weakSelf) return;
+                                         
+                                         // updates the ui
+                                         weakSelf.locations = locations;
+                                         [weakSelf.tableView reloadData];
+                                     }];
 }
 
 #pragma mark - Table view data source
 
-- (NSInteger)tableView:(UITableView *)tableView
- numberOfRowsInSection:(NSInteger)section {
-    return self.dataSource.count;
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    return self.locations.count;
 }
 
-- (UITableViewCell *)tableView:(UITableView *)tableView
-         cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    UITableViewCell *cell =
-        [tableView dequeueReusableCellWithIdentifier:@"cell"
-                                        forIndexPath:indexPath];
-
-    CKLocation *location = self.dataSource[indexPath.row];
-
-    cell.textLabel.text = [location description];
-
+- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
+    static NSString *cellIdentifier = @"cell";
+    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier forIndexPath:indexPath];
+    cell.textLabel.text = self.locations[indexPath.row].description;
     return cell;
-}
-
-#pragma mark - TableView delegate
-
-- (void)      tableView:(UITableView *)tableView
-didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    [tableView deselectRowAtIndexPath:indexPath animated:YES];
 }
 
 @end
