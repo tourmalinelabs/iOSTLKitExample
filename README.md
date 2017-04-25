@@ -14,14 +14,18 @@ how developers can use `TLKit`.
 
 ## Option 1: CocoaPods
 
-We recommand installing `TLKit` using [CocoaPods](http://cocoapods.org/), which provides a simple dependency management system that automates the error-prone process of manually configuring libraries. First make sure you have `CocoaPods` installed (you will also need to have Ruby installed):
+We recommand installing `TLKit` using [CocoaPods](http://cocoapods.org/), which 
+provides a simple dependency management system that automates the error-prone 
+process of manually configuring libraries. First make sure you have `CocoaPods` 
+installed (you will also need to have Ruby installed):
 
 ```
 sudo gem install cocoapods
 pod setup
 ```
 
-Now create an empty file in the root of your project directory, and name it `Podfile` or just run the following command:
+Now create an empty file in the root of your project directory, and name it 
+`Podfile` or just run the following command:
 
 ```
 pod init
@@ -41,16 +45,25 @@ pod 'TLKit'
 ...
 ```
 
-Finally, save and close the `Podfile` and run `pod install` to setup your `CocoaPods` environment and import `TLKit` into your project. Make sure to start working from the `.xcworkspace` file that `CocoaPods` automatically creates, not the `.xcodeproj` you may have had open.
+Finally, save and close the `Podfile` and run `pod install` to setup your 
+`CocoaPods` environment and import `TLKit` into your project. Make sure to start 
+working from the `.xcworkspace` file that `CocoaPods` automatically creates, not
+ the `.xcodeproj` you may have had open.
 
 That's it! You can start coding!
 
 ## Option 2: Manual installation
 
-Instructions provided by Apple for adding an existing framework can be found 
-[here](https://developer.apple.com/library/ios/recipes/xcode_help-structure_navigator/articles/Adding_a_Framework.html).
+While Cocoapods are the recommended method for Adding TLKit to a project it can
+also be adde. This also requires manually adding it's dependent frameworks, 
+configuring linking, and configuring background modes. 
 
-The `TLKit.framework` can also be dragged into an XCode project.
+### Adding the TLKit framework
+A zip file containing the framework can be downloaded from 
+[here](https://s3.amazonaws.com/tlsdk-ios-stage-frameworks/TLKit-7.2.17041800.zip).
+Once unzipped the file can be added to an existing project by dragging the 
+framework into that project, or following the 
+[instructions provided Apple](https://developer.apple.com/library/ios/recipes/xcode_help-structure_navigator/articles/Adding_a_Framework.html).
 
 ### Dependent frameworks
 
