@@ -97,7 +97,6 @@ Under `Capabilities > Background Modes` check the box next to
 
 # Using TLKit
 
-
 The heart of the TLKit is the Context Engine. The engine needs to 
 be initialized with a registered user in order to use any of its 
 features. 
@@ -115,47 +114,77 @@ device. See the Data Services api on how to register and authenticate a
 user.
  
 For initial integration and evaluation purposes or for applications that do not 
-have a server component we the `CKDefaultAuth` class which will provide 
+have a server component we provide the `CKDefaultAuth` class which will provide 
 registration and authentication services for the TL Server.
 
 Initialization with the `CKDefaultAuth` is covered in the next section.
 
-## Starting, Stopping CKContextKit
+## Initializing and destroying the engine
 
-An example of initializing the engine with the `CKDefaultAuth` is provided here:
+There are two manners of initializing the engine depending on your needs. An 
+automatic drive detection mode where the SDK will automatically detect and 
+monitor drives and a manual mode where the SDK will only monitor drives when 
+explicitly told to by the application.
 
-```objc 
-#import <TLKit/CKContextKit.h>
-...
+The first mode is useful in cases where the user is not interacting with the 
+application to start and end drives. While the second mode is useful when the 
+user will explicitly start and end drives in the application.
 
-[CKContextKit initWithApiKey:@"bdf760a8dbf64e35832c47d8d8dffcc0"
-                             authMgr:[[CKDefaultAuth alloc]
-                                 initWithApiKey:API_KEY
-                                         userId:USERNAME
-                                           pass:PASSWORD]
-                       launchOptions:nil
-                   withResultToQueue:dispatch_get_main_queue()
-                         withHandler:^(BOOL successful, NSError *error) {
-                             if (error) {
-                                 NSLog(@"Failed to start TLKit with error: %@",
-                                     error);
-                                 return;
-                             }
-                         }];
-```     
-
-`CKContextKit` attempts to validate permissions and see other necessary 
-conditions are met when initializing the engine. If any of these conditions 
-are not met it will fail with an `error` that can be used to debug the 
-issue.
+Regardless of the mode it is started in, `CKContextKit` attempts to validate 
+permissions and see other necessary conditions are met when initializing the 
+engine. If any of these conditions are not met it will fail with an `error` that
+can be used to debug the issue.
 
 One example of where a failure would occur would be location permissions
 not being enabled for the application.
 
-Once initialized there is no reason to destroy the engine unless you need to 
-set a new `CKAuthenticationManagerDelegate` for a different user or password. In
-those cases, the engine can be destroyed as follows:
+### Initializing the engine for automatic drive monitoring  
 
+Once started in this mode the engine is able to automatically detect and record 
+all drives.
+
+```objc 
+[CKContextKit initAutomaticWithApiKey:API_KEY
+                              authMgr:[[CKDefaultAuth alloc] 
+                                  initWithApiKey:API_KEY 
+                                          userId:USERNAME 
+                                            pass:PASSWORD]
+                        launchOptions:nil
+                    withResultToQueue:dispatch_get_main_queue()
+                          withHandler:^(BOOL __unused successful, 
+                                        NSError * _Nullable error) {
+                              if (error) {
+                                  NSLog(@"Failed to start TLKit: %@", error);
+                                  return;
+                              }
+                          }];
+}
+```     
+
+### Initializing the engine for manual drive monitoring  
+
+```objc 
+[CKContextKit initManualWithApiKey:API_KEY
+                           authMgr:[[CKDefaultAuth alloc] 
+                               initWithApiKey:API_KEY 
+                                       userId:USERNAME 
+                                         pass:PASSWORD]
+                     launchOptions:nil
+                 withResultToQueue:dispatch_get_main_queue()
+                       withHandler:^(BOOL __unused successful, 
+                                     NSError * _Nullable error) {
+                           if (error) {
+                               NSLog(@"Failed to start TLKit: %@", error);
+                               return;
+                           }
+                       }];
+```     
+
+### Destroying an engine.
+
+Once initialized there is no reason to destroy the engine unless you need to 
+set a new `CKAuthenticationManagerDelegate` for a different user or password. Or In
+those cases, the engine can be destroyed as follows:
 
 `CKContextKit` can be destroyed as follows
 
@@ -177,24 +206,6 @@ those cases, the engine can be destroyed as follows:
 best practice to request "Always" authorization from the user for 
 accesssing location prior to initializing the engine.
 
-## Monitoring API
-
-By default monitoring is disabled when the Engine is initialized. It needs to be
-explicitly enabled to track drives and locations. Enabling is done as follows:
-                    
-```objectivec
-CKContextKit.isMonitoring = YES;
-```
-
-Monitoring can be disabled at any time as follows
-
-```objectivec
-CKContextKit.isMonitoring = NO;
-```
-
-If monitoring is enabled at any point during a drive that drive will be 
-recorded.
-
 ## Drive Monitoring
 
 Drive monitoring functionality is accessed through the 
@@ -204,18 +215,43 @@ Drive monitoring functionality is accessed through the
 self.actMgr = [CKActivityManager new];
 ```
 
-### Starting, Stopping drive monitoring
+### Starting and stopping manual drives
+
+If the engine was initialized into manual mode, drives can be started and 
+stopped as follows.
+
+```objc
+NSUUID* driveId = [self.activityManager startManualTrip];
+```
+
+```objc
+[self.activityManager stopManualTrip: driveId];
+```
+
+Multiple overlapping manual drives can be started at the same time.
+
+
+### Registering a drive event listener
+
+The application can register to receive drive start, update and events as 
+follows.
 
 Register a listener with the drive monitoring service as follows.
 
 ```objc
-[self.actMgr 
-    startDriveMonitoringToQueue:dispatch_get_main_queue()
-                    withHandler:^(CKActivityEvent *evt, NSError * err) {
-                                // Update UI
-                                [weakSelf updateDataSource];
-                                NSLog(@"Drive event: %@", evt);
-                              }];
+[self.activityManager 
+    listenForDriveEventsToQueue:dispatch_get_main_queue()
+                    withHandler:^(CKActivityEvent * _Nullable evt, 
+                        NSError * _Nullable error) {
+                                          
+                        // handle error
+                        if (error) {
+                            NSLog(@"Failed to register lstnr: %@", error);
+                            return;
+                        }
+                                          
+                        NSLog(@"New CKActivityEvent: %@", evt);
+                    }];
 ```
 
 _Note_: multiple drive events may be received for the same drive as the drive 
@@ -225,7 +261,7 @@ points.
 Drive events can be stopped as follows
 
 ```objc
-[self.actMgr stopDriveMonitoring];
+[self.actMgr stopListeningForDriveEvents];
 ```
 
 ### Querying previous drives 
