@@ -141,34 +141,32 @@ NS_ASSUME_NONNULL_END
 }
 
 - (void)mergeDrivesWithEvent:(CKActivityEvent *)event {
-    @synchronized (self) {
-        NSMutableArray<CKDrive *> *drives = self.drives.mutableCopy;
-        
-        // new event drive id
-        NSUUID *uuid = event.activity.id;
-        
-        // lookup for the drive
-        CKDrive *drive = nil;
-        for (CKDrive *d in drives) {
-            if ([d.id isEqual:uuid]) {
-                drive = d;
-                break;
-            }
+    NSMutableArray<CKDrive *> *drives = self.drives.mutableCopy;
+    
+    // new event drive id
+    NSUUID *uuid = event.activity.id;
+    
+    // lookup for the drive
+    CKDrive *drive = nil;
+    for (CKDrive *d in drives) {
+        if ([d.id isEqual:uuid]) {
+            drive = d;
+            break;
         }
-        
-        // removes the drive if found
-        if (drive) {
-            [drives removeObject:drive];
-        }
-        
-        // add the last event's drive
-        [drives addObject:(CKDrive *)event.activity];
-        
-        // sort the drives
-        NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"startTime" ascending:NO];
-        [drives sortUsingDescriptors:@[sort]];
-        self.drives = drives.copy;
     }
+    
+    // removes the drive if found
+    if (drive) {
+        [drives removeObject:drive];
+    }
+    
+    // add the last event's drive
+    [drives addObject:(CKDrive *)event.activity];
+    
+    // sort the drives
+    NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"startTime" ascending:NO];
+    [drives sortUsingDescriptors:@[sort]];
+    self.drives = drives.copy;
     
     // query active manual drives before reloading
     [self queryActiveDrives];
