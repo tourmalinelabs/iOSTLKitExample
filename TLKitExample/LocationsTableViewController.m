@@ -20,6 +20,8 @@
  ******************************************************************************/
 
 #import "LocationsTableViewController.h"
+#import "LocationCell.h"
+
 #import <TLKit/CKLocationManager.h>
 #import <TLKit/CKLocation.h>
 
@@ -28,7 +30,6 @@
 @interface LocationsTableViewController ()
 @property(nonatomic) CKLocationManager     *locationManager;
 @property(nonatomic) NSArray<CKLocation *> *locations;
-- (IBAction)onBarButtonItemStop:(id)sender;
 - (void)startLocationsMonitoring;
 - (void)stopLocationsMonitoring;
 - (void)queryLocations;
@@ -54,10 +55,6 @@
     [self stopLocationsMonitoring];
     // dimiss progress if needed
     [SVProgressHUD dismiss];
-}
-
-- (IBAction)onBarButtonItemStop:(id __unused)sender {
-    [self stopLocationsMonitoring];
 }
 
 - (void)startLocationsMonitoring {
@@ -122,9 +119,9 @@
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    static NSString *cellIdentifier = @"cell";
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier forIndexPath:indexPath];
-    cell.textLabel.text = self.locations[indexPath.row].description;
+    static NSString *cellIdentifier = @"LocationCellIdentifier";
+    LocationCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier forIndexPath:indexPath];
+    [cell configureCellWithLocation:self.locations[indexPath.row]];
     return cell;
 }
 

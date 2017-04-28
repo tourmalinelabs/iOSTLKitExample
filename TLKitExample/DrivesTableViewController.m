@@ -20,20 +20,37 @@
  ******************************************************************************/
 
 #import "DrivesTableViewController.h"
+#import "DriveCell.h"
+
 #import <TLKit/CKActivityManager.h>
 #import <TLKit/CKActivityEvent.h>
 #import <TLKit/CKDrive.h>
 
 @import SVProgressHUD;
 
-@interface DrivesTableViewController ()
+NS_ASSUME_NONNULL_BEGIN
+
+@interface DrivesTableViewController () <UITableViewDataSource, UITableViewDelegate>
+// IBActions
+@property (weak,   nonatomic) IBOutlet UITableView *tableView;
+@property (strong, nonatomic) IBOutlet UIButton    *buttonStartDrive;
+// Internal
 @property (strong, nonatomic) CKActivityManager  *activityManager;
 @property (strong, nonatomic) NSArray<CKDrive *> *drives;
-- (IBAction)onBarButtonItemStop:(id)sender;
+@property (strong, nonatomic) NSArray<CKDrive *> *active;
+// IBActions
+- (IBAction)onButtonStartDrive:(id)sender;
+// Private
 - (void)startDriveMonitoring;
 - (void)stopDriveMonitoring;
+- (void)mergeDrivesWithEvent:(CKActivityEvent *)event;
 - (void)queryDrives;
+- (void)queryActiveDrives;
+- (BOOL)isDriveActiveManual:(CKDrive *)drive;
+- (void)updateStartDriveButtonVisibility;
 @end
+
+NS_ASSUME_NONNULL_END
 
 @implementation DrivesTableViewController
 
@@ -42,6 +59,11 @@
     
     // holds the drives
     self.drives = @[];
+    // holds the current active manual drives
+    self.active = @[];
+
+    // show / hide Start manual drive button
+    [self updateStartDriveButtonVisibility];
     
     // starts drive monitoring
     [self startDriveMonitoring];
@@ -57,8 +79,29 @@
     [SVProgressHUD dismiss];
 }
 
-- (IBAction)onBarButtonItemStop:(id)sender {
-    [self stopDriveMonitoring];
+- (IBAction)onButtonStartDrive:(__unused id)sender {
+    if (self.manual) {
+        [self.activityManager startManualTrip];
+    }
+}
+
+- (void)updateStartDriveButtonVisibility {
+    UIEdgeInsets contentInset = self.tableView.contentInset;
+    UIEdgeInsets scrollIndicatorInsets = self.tableView.scrollIndicatorInsets;
+    if (self.manual) {
+        CGFloat height = CGRectGetHeight(self.buttonStartDrive.bounds);
+        contentInset.bottom = height;
+        self.tableView.contentInset = contentInset;
+        scrollIndicatorInsets.bottom = height;
+        self.tableView.scrollIndicatorInsets = scrollIndicatorInsets;
+        self.buttonStartDrive.hidden = NO;
+    } else {
+        contentInset.bottom = 0.0f;
+        self.tableView.contentInset = contentInset;
+        scrollIndicatorInsets.bottom = 0.0f;
+        self.tableView.scrollIndicatorInsets = scrollIndicatorInsets;
+        self.buttonStartDrive.hidden = YES;
+    }
 }
 
 - (void)startDriveMonitoring {
@@ -70,28 +113,66 @@
     // start drive monitoring
     NSLog(@"<< Starting Drive Monitoring >>");
     __weak __typeof__(self) weakSelf = self;
-    [self.activityManager startDriveMonitoringToQueue:dispatch_get_main_queue()
+    [self.activityManager listenForDriveEventsToQueue:dispatch_get_main_queue()
                                           withHandler:^(CKActivityEvent * _Nullable evt, NSError * _Nullable error) {
+                                              
                                               // handle error
                                               if (error) {
                                                   NSLog(@"Failed to start drive monitoring with error: %@", error);
                                                   return;
                                               }
-                                              NSLog(@"New CKActivityEvent: %@", evt);
                                               
+                                              NSLog(@"New CKActivityEvent: %@", evt);
                                               if (!weakSelf) return;
                                               
                                               // update the drives once the activity is finalized
                                               if (evt.type == CKActivityEventFinalized) {
                                                   [weakSelf queryDrives];
+                                              } else {
+                                                  [weakSelf mergeDrivesWithEvent:evt];
                                               }
                                           }];
 }
 
 - (void)stopDriveMonitoring {
     // stop Drive Monitoring
-    [self.activityManager stopDriveMonitoring];
+    [self.activityManager stopListeningForDriveEvents];
     NSLog(@"<< Stopped Drive monitoring >>");
+}
+
+- (void)mergeDrivesWithEvent:(CKActivityEvent *)event {
+    @synchronized (self) {
+        NSMutableArray<CKDrive *> *drives = self.drives.mutableCopy;
+        
+        // new event drive id
+        NSUUID *uuid = event.activity.id;
+        
+        // lookup for the drive
+        CKDrive *drive = nil;
+        for (CKDrive *d in drives) {
+            if ([d.id isEqual:uuid]) {
+                drive = d;
+                break;
+            }
+        }
+        
+        // removes the drive if found
+        if (drive) {
+            [drives removeObject:drive];
+        }
+        
+        // add the last event's drive
+        [drives addObject:(CKDrive *)event.activity];
+        
+        // sort the drives
+        NSSortDescriptor *sort = [NSSortDescriptor sortDescriptorWithKey:@"startTime" ascending:NO];
+        [drives sortUsingDescriptors:@[sort]];
+        self.drives = drives.copy;
+    }
+    
+    // query active manual drives before reloading
+    [self queryActiveDrives];
+    [self.tableView reloadData];
 }
 
 - (void)queryDrives {
@@ -107,6 +188,7 @@
                                   withHandler:^(NSArray<__kindof CKActivity *> * _Nullable activities, NSError * _Nullable err) {
                                       [SVProgressHUD dismiss];
                                       
+                                      // handle error
                                       if (err) {
                                           NSLog(@"Query Drives failed with error: %@", err);
                                           return;
@@ -115,10 +197,43 @@
                                       NSLog(@"Query Drives result: %@", activities);
                                       if (!weakSelf) return;
                                       
-                                      // updates the ui
                                       weakSelf.drives = activities;
-                                      [weakSelf.tableView reloadData];
+                                      if (weakSelf.manual) {
+                                          [weakSelf queryActiveDrives];
+                                      } else {
+                                          [weakSelf.tableView reloadData];
+                                      }
                                   }];
+}
+
+- (void)queryActiveDrives {
+    // only query manual active drives if in manual drive detection mode
+    if (self.manual) {
+        __weak __typeof__(self) weakSelf = self;
+        [self.activityManager queryManualTripstoQueue:dispatch_get_main_queue()
+                                          withHandler:^(NSArray<__kindof CKActivity *> * _Nullable activities, NSError * _Nullable err) {
+                                              // handle error
+                                              if (err) {
+                                                  NSLog(@"Query Active Manual Drives failed with error: %@", err);
+                                                  return;
+                                              }
+                                              
+                                              NSLog(@"Query Active Manual Drives result: %@", activities);
+                                              if (!weakSelf) return;
+                                              
+                                              weakSelf.active = activities;
+                                              [weakSelf.tableView reloadData];
+                                          }];
+    }
+}
+
+- (BOOL)isDriveActiveManual:(CKDrive *)drive {
+    if (self.manual) {
+        for (CKDrive *act in self.active)
+            if ([act.id isEqual:drive.id])
+                return YES;
+    }
+    return NO;
 }
 
 #pragma mark - TableView DataSource
@@ -128,9 +243,10 @@
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    static NSString *cellIdentifier = @"cell";
-    UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier forIndexPath:indexPath];
-    cell.textLabel.text = self.drives[indexPath.row].description;
+    static NSString *cellIdentifier = @"DriveCellIdentifier";
+    DriveCell *cell = [tableView dequeueReusableCellWithIdentifier:cellIdentifier forIndexPath:indexPath];
+    CKDrive *drive = self.drives[indexPath.row];
+    [cell configureCellWithDrive:drive active:[self isDriveActiveManual:drive]];
     return cell;
 }
 

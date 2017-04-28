@@ -21,6 +21,6 @@
 
 #import <UIKit/UIKit.h>
 
-@interface DrivesTableViewController : UITableViewController
-
+@interface DrivesTableViewController : UIViewController
+@property (assign, nonatomic) BOOL manual;
 @end

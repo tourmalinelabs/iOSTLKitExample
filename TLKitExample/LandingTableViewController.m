@@ -20,6 +20,8 @@
  ******************************************************************************/
 
 #import "LandingTableViewController.h"
+#import "DrivesTableViewController.h"
+#import "CLLocation+Format.h"
 #import <CoreLocation/CoreLocation.h>
 #import <TLKit/CKContextKit.h>
 #import <TLKit/CKAuthenticationManagerDelegate.h>
@@ -32,8 +34,24 @@ static NSString *const API_KEY  = @"bdf760a8dbf64e35832c47d8d8dffcc0";
 static NSString *const USERNAME = @"example@tourmalinelabs.com";
 static NSString *const PASSWORD = @"password";
 
+// used to store the last monitoring state to user defaults
+static NSString *const MONITORING_STATE_KEY = @"MONITORING_STATE_KEY";
+
+#pragma mark - MonitoringState enumeration values
+typedef NS_ENUM(NSUInteger, MonitoringState) {
+    MonitoringStateStop,
+    MonitoringStateAuto,
+    MonitoringStateManual,
+    __MonitoringStateCount__, // Don't touch me!
+};
+
 @interface LandingTableViewController () <CLLocationManagerDelegate>
-@property (nonatomic) CLLocationManager *clLocationManager;
+@property (strong, nonatomic) CLLocationManager *clLocationManager;
+@property (assign, nonatomic) MonitoringState monitoringState;
+- (NSString *)monitoringStateString;
+- (void)stopMonitoring;
+- (void)startMonitoringAuto;
+- (void)startMonitoringManual;
 @end
 
 @implementation LandingTableViewController
@@ -41,74 +59,192 @@ static NSString *const PASSWORD = @"password";
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    // Is the engine already started ?
-    if (!CKContextKit.isInitialized) {
-        
-        // Initializes the engine with the test account
-        [CKContextKit initWithApiKey:API_KEY
-                             authMgr:[[CKDefaultAuth alloc] initWithApiKey:API_KEY userId:USERNAME pass:PASSWORD]
-                       launchOptions:nil
-                   withResultToQueue:dispatch_get_main_queue()
-                         withHandler:^(BOOL successful, NSError *error) {
-                             if (error) {
-                                 NSLog(@"Failed to start TLKit with error: %@", error);
-                                 return;
-                             }
-                         }];
+    switch (self.monitoringState) {
+        case MonitoringStateStop:
+            break;
+        case MonitoringStateAuto:
+            [self startMonitoringAuto];
+            break;
+        case MonitoringStateManual:
+            [self startMonitoringManual];
+            break;
+        default:
+            break;
     }
+}
+
+- (MonitoringState)monitoringState {
+    return [NSUserDefaults.standardUserDefaults integerForKey:MONITORING_STATE_KEY];
+}
+
+- (void)setMonitoringState:(MonitoringState)monitoringState {
+    NSUserDefaults *standardUserDefaults = NSUserDefaults.standardUserDefaults;
+    [standardUserDefaults setInteger:monitoringState forKey:MONITORING_STATE_KEY];
+    [standardUserDefaults synchronize];
+}
+
+- (NSString *)monitoringStateString {
+    switch (self.monitoringState) {
+        case MonitoringStateStop:
+            return @"Not monitoring";
+        case MonitoringStateAuto:
+            return @"Automatic Monitoring";
+        case MonitoringStateManual:
+            return @"Manual Monitoring";
+        default:
+            break;
+    }
+    return @"?";
+}
+
+- (void)stopMonitoring {
+    // destroy engine
+    __weak __typeof__(self) weakSelf = self;
+    [CKContextKit destroyWithResultToQueue:dispatch_get_main_queue()
+                               withHandler:^(BOOL __unused successful, NSError * _Nullable error) {
+                                   if (error) {
+                                       NSLog(@"Failed to stop TLKit with error: %@", error);
+                                       return;
+                                   }
+                                   CKContextKit.isMonitoring = NO;
+                                   weakSelf.monitoringState = MonitoringStateStop;
+                                   [weakSelf.tableView reloadData];
+                               }];
+}
+
+- (void)startMonitoringAuto {
+    // check if not already initialized
+    if (CKContextKit.isInitialized) {
+        NSLog(@"TLKit is already started! (isMonitoring: %@ - mode: %@)",
+              CKContextKit.isMonitoring ? @"YES" : @"NO",
+              self.monitoringStateString);
+        return;
+    }
+    // initializes engine with automatic drive detection
+    __weak __typeof__(self) weakSelf = self;
+    [CKContextKit initAutomaticWithApiKey:API_KEY
+                                  authMgr:[[CKDefaultAuth alloc] initWithApiKey:API_KEY userId:USERNAME pass:PASSWORD]
+                            launchOptions:nil
+                        withResultToQueue:dispatch_get_main_queue()
+                              withHandler:^(BOOL __unused successful, NSError * _Nullable error) {
+                                  if (error) {
+                                      NSLog(@"Failed to start TLKit with error: %@", error);
+                                      return;
+                                  }
+                                  CKContextKit.isMonitoring = YES;
+                                  weakSelf.monitoringState = MonitoringStateAuto;
+                                  [weakSelf.tableView reloadData];
+                              }];
+}
+
+- (void)startMonitoringManual {
+    // check if not already initialized
+    if (CKContextKit.isInitialized) {
+        NSLog(@"TLKit is already started! (isMonitoring: %@ - mode: %@)",
+              CKContextKit.isMonitoring ? @"YES" : @"NO",
+              self.monitoringStateString);
+        return;
+    }
+    // initializes engine with manual drive detection
+    __weak __typeof__(self) weakSelf = self;
+    [CKContextKit initManualWithApiKey:API_KEY
+                               authMgr:[[CKDefaultAuth alloc] initWithApiKey:API_KEY userId:USERNAME pass:PASSWORD]
+                         launchOptions:nil
+                     withResultToQueue:dispatch_get_main_queue()
+                           withHandler:^(BOOL __unused successful, NSError * _Nullable error) {
+                               if (error) {
+                                   NSLog(@"Failed to start TLKit with error: %@", error);
+                                   return;
+                               }
+                               CKContextKit.isMonitoring = YES;
+                               weakSelf.monitoringState = MonitoringStateManual;
+                               [weakSelf.tableView reloadData];
+                           }];
 }
 
 #pragma mark - UITableViewDataSource
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    if (CLLocationManager.authorizationStatus != kCLAuthorizationStatusAuthorizedAlways) {
-        return 1;
-    }
-    return 2;
+    if (CLLocationManager.authorizationStatus != kCLAuthorizationStatusAuthorizedAlways) return 1;
+    return CKContextKit.isInitialized ? 3 : 2;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
-    
     UITableViewCell *cell = [super tableView:tableView cellForRowAtIndexPath:indexPath];
-    if (indexPath.section == 0 && indexPath.row == 0) {
-        switch (CLLocationManager.authorizationStatus) {
-            case kCLAuthorizationStatusNotDetermined: {
-                cell.textLabel.text = @"Request Location Authorization";
-                break;
-            }
-            case kCLAuthorizationStatusAuthorizedAlways: {
-                cell.textLabel.text = @"Authorized Always";
-                break;
-            }
-            case kCLAuthorizationStatusDenied: {
-                cell.textLabel.text = @"Not Authorized";
-                break;
-            }
-            default:
-                break;
+    switch (indexPath.section) {
+        case 0: {
+            cell.textLabel.text = CLLocation.formattedAuthorization;
+            cell.selectionStyle = CLLocationManager.authorizationStatus == kCLAuthorizationStatusNotDetermined ? UITableViewCellSelectionStyleDefault : UITableViewCellSelectionStyleNone;
+            break;
         }
+        case 1: {
+            BOOL enabled = NO;
+            if (CKContextKit.isMonitoring) {
+                enabled = indexPath.row == MonitoringStateStop;
+            } else {
+                enabled = indexPath.row != MonitoringStateStop;
+            }
+            cell.textLabel.enabled = enabled;
+            cell.selectionStyle = enabled ? UITableViewCellSelectionStyleDefault : UITableViewCellSelectionStyleNone;
+            break;
+        }
+        case 2: {
+            break;
+        }
+        default:
+            break;
     }
     return cell;
 }
 
+- (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section {
+    return section == 1 ? [NSString stringWithFormat:@"TLKit state: %@", self.monitoringStateString] : nil;
+}
+
 #pragma mark - UITableViewDelegate
 
-- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    [tableView deselectRowAtIndexPath:indexPath animated:YES];
-    
+- (NSIndexPath *)tableView:(UITableView *)tableView willSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     switch (indexPath.section) {
         case 0: {
-            if (indexPath.row == 0) {
-                [self requestLocationPermissions];
-            }
+            // enable selection only for requesting authorization
+            if (CLLocationManager.authorizationStatus != kCLAuthorizationStatusNotDetermined) return nil;
             break;
         }
         case 1: {
-            if (indexPath.row == 0) {
-                CKContextKit.isMonitoring = YES;
-                [self performSegueWithIdentifier:@"FeaturesSegue" sender:nil];
-            } else if (indexPath.row == 1) {
-                CKContextKit.isMonitoring = NO;
+            // avoid selecting stop if not monitoring or any start if monitoring
+            if (CKContextKit.isMonitoring) {
+                if (indexPath.row != MonitoringStateStop) return nil;
+            } else {
+                if (indexPath.row == MonitoringStateStop) return nil;
+            }
+            break;
+        }
+        default:
+            break;
+    }
+    return indexPath;
+}
+
+- (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
+    [tableView deselectRowAtIndexPath:indexPath animated:YES];
+    switch (indexPath.section) {
+        case 0: {
+            [self requestLocationPermissions];
+            break;
+        }
+        case 1: {
+            switch (indexPath.row) {
+                case MonitoringStateStop:
+                    [self stopMonitoring];
+                    break;
+                case MonitoringStateAuto:
+                    [self startMonitoringAuto];
+                    break;
+                case MonitoringStateManual:
+                    [self startMonitoringManual];
+                    break;
+                default:
+                    break;
             }
             break;
         }
@@ -118,13 +254,10 @@ static NSString *const PASSWORD = @"password";
 }
 
 - (void)requestLocationPermissions {
-    
     if (CLLocationManager.authorizationStatus == kCLAuthorizationStatusNotDetermined) {
-        
         // Request "Always" Location permissions
         self.clLocationManager = CLLocationManager.new;
         self.clLocationManager.delegate = self;
-
         if ([self.clLocationManager respondsToSelector:@selector(requestAlwaysAuthorization)]) {
             [self.clLocationManager requestAlwaysAuthorization];
         } else {
@@ -137,6 +270,14 @@ static NSString *const PASSWORD = @"password";
 
 - (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
     [self.tableView reloadData];
+}
+
+#pragma mark - Navigation
+
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    if ([segue.destinationViewController isKindOfClass:DrivesTableViewController.class]) {
+        ((DrivesTableViewController *)segue.destinationViewController).manual = self.monitoringState == MonitoringStateManual;
+    }
 }
 
 @end
