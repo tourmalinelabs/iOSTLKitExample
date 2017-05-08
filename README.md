@@ -1,4 +1,4 @@
-C Getting started with TLKit for iOS
+# Getting started with TLKit for iOS
 
 This document contains a quick start guide for integrating `TLKit` 
 into your iOS application. More detailed documentation of the APIs can 
@@ -352,4 +352,19 @@ A listener can be unregistered as follows:
 _Note_: This will only include locations that were recorded while a listener
 was registered as stated in the previous section.
 
+# Trouble Shooting
 
+## Out of date TLKit Cocoapod
+Errors like 
+```
+No visible @interface for 'CKActivityManager' declares the selector 'stopManualTrip:'
+```
+or
+```
+No known class method for selector 'initAutomaticWithApiKey:authMgr:launchOptions:withResultToQueue:withHandler:'
+```
+Your TLKit Cocoapod is out of date it can be updated as follows:
+
+```bash
+pod update TLKit
+```
