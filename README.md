@@ -85,14 +85,14 @@ For each target using `TLKit`, in the configuration under
 `Build Settings > Other Linker Flags` make sure the following flags are 
 set `-lm -all_load -ObjC`
 
-If you see a lot of errors related to linking, it is possible that 
+If you see errors related to linking, it is possible that 
 `libc++` is not being linked for you. To solve this either change one 
 file extension from `.m` to `.mm` or add a new empty `c++` file to the 
 project.
 
-It may happen as well, depending on your project that `-lm -all_load -ObjC` 
-flags cause duplicated symbols or similar linking errors. In this case just try to replace 
-`-lm -all_load -ObjC` with `-force_load TLKit.framework/Versions/A/TLKit`
+If you see errors related to duplicated symbols or similar linking 
+errors this could be caused by the above linking flags. In this case just try 
+to replace `-lm -all_load -ObjC` with `-force_load TLKit.framework/Versions/A/TLKit`
 
 ## Configure Background Modes
 
