@@ -90,6 +90,10 @@ If you see a lot of errors related to linking, it is possible that
 file extension from `.m` to `.mm` or add a new empty `c++` file to the 
 project.
 
+It may happen as well, depending on your project that `-lm -all_load -ObjC` 
+flags cause duplicated symbols or similar linking errors. In this case just try to replace 
+`-lm -all_load -ObjC` with `-force_load TLKit.framework/Versions/A/TLKit`
+
 ## Configure Background Modes
 
 Under `Capabilities > Background Modes` check the box next to 
