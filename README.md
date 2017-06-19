@@ -60,7 +60,7 @@ configuring linking, and configuring background modes.
 
 ### Adding the TLKit framework
 A zip file containing the framework can be downloaded from 
-[here](https://s3.amazonaws.com/tlsdk-ios-stage-frameworks/TLKit-7.2.17041800.zip).
+[here](https://s3.amazonaws.com/tlsdk-ios-stage-frameworks/TLKit-9.0.17061900.zip).
 Once unzipped the file can be added to an existing project by dragging the 
 framework into that project, or following the 
 [instructions provided Apple](https://developer.apple.com/library/ios/recipes/xcode_help-structure_navigator/articles/Adding_a_Framework.html).
@@ -102,87 +102,64 @@ Under `Capabilities > Background Modes` check the box next to
 # Using TLKit
 
 The heart of the TLKit is the Context Engine. The engine needs to 
-be initialized with a registered user in order to use any of its 
-features. 
+be initialized with some user information and a drive detection mode in order to
+use any of its features. 
 
-## Registering and authenticating users.
+## User information 
 
-TLKit needs to be initialized in order to use any of its features and
-starting TLKit requires passing an `CKAuthenticationManagerDelegate` instance to
-the engine which handles authenticating against the TL Server.
+There are two types of user information that can be used to initialize the 
+engine: 
+  1. A SHA-256 hash of some user id. Currently only hashes of emails are allowed
+  but other TL approved ids could be used.
+  2. An application specific username and password. 
+  
+The first type of user info is appropriate for cases where the SDK is used only
+for data collection. The second type is useful in cases where the application 
+wants to access the per user information and provide password protected access
+to it to it's users. 
 
-In a production environment authentication should be done between the
-Application Server and the TLKit server. This will prevent the API
-key from being leaked out as part of SSL proxying attack on the mobile 
-device. See the Data Services api on how to register and authenticate a 
-user.
- 
-For initial integration and evaluation purposes or for applications that do not 
-have a server component we provide the `CKDefaultAuth` class which will provide 
-registration and authentication services for the TL Server.
+## Automatic and manual modes
 
-Initialization with the `CKDefaultAuth` is covered in the next section.
-
-## Initializing and destroying the engine
-
-There are two manners of initializing the engine depending on your needs. An 
-automatic drive detection mode where the SDK will automatically detect and 
-monitor drives and a manual mode where the SDK will only monitor drives when 
-explicitly told to by the application.
+The engine can be initialized for either automatic drive detection where the SDK
+will automatically detect and monitor drives or a manual drive detection where 
+the SDK will only monitor drives when explicitly told to by the application.
 
 The first mode is useful in cases where the user is not interacting with the 
 application to start and end drives. While the second mode is useful when the 
 user will explicitly start and end drives in the application.
 
-Regardless of the mode it is started in, `CKContextKit` attempts to validate 
-permissions and see other necessary conditions are met when initializing the 
-engine. If any of these conditions are not met it will fail with an `error` that
-can be used to debug the issue.
-
-One example of where a failure would occur would be location permissions
-not being enabled for the application.
-
-### Initializing the engine for automatic drive monitoring  
+## Example initialization with SHA-256 hash in automatic mode
+The below examples demonstrate initialization with just a SHA-256 hash. The 
+example application provides code for generating this hash.
 
 Once started in this mode the engine is able to automatically detect and record 
 all drives.
 
 ```objc 
-[CKContextKit initAutomaticWithApiKey:API_KEY
-                              authMgr:[[CKDefaultAuth alloc] 
-                                  initWithApiKey:API_KEY 
-                                          userId:USERNAME 
-                                            pass:PASSWORD]
-                        launchOptions:nil
-                    withResultToQueue:dispatch_get_main_queue()
-                          withHandler:^(BOOL __unused successful, 
-                                        NSError * _Nullable error) {
-                              if (error) {
-                                  NSLog(@"Failed to start TLKit: %@", error);
-                                  return;
-                              }
-                          }];
-}
-```     
+__weak __typeof__(self) weakSelf = self;
+[CKContextKit initWithApiKey:API_KEY
+                    hashedId:[self hashedId:@"iosexample@tourmalinelabs.com"]
+                   automatic:YES // set to `NO` for manual mode 
+                    launchOptions:nil
+                withResultToQueue:dispatch_get_main_queue()
+                      withHandler:^(BOOL __unused successful,
+                          NSError * _Nullable error) {
+                          if (error) {
+                              NSLog(@"Failed to start TLKit: %@", error);
+                              return;
+                          }
+                      }];
+```
 
-### Initializing the engine for manual drive monitoring  
 
-```objc 
-[CKContextKit initManualWithApiKey:API_KEY
-                           authMgr:[[CKDefaultAuth alloc] 
-                               initWithApiKey:API_KEY 
-                                       userId:USERNAME 
-                                         pass:PASSWORD]
-                     launchOptions:nil
-                 withResultToQueue:dispatch_get_main_queue()
-                       withHandler:^(BOOL __unused successful, 
-                                     NSError * _Nullable error) {
-                           if (error) {
-                               NSLog(@"Failed to start TLKit: %@", error);
-                               return;
-                           }
-                       }];
-```     
+## Trouble shooting
+At initialization, `CKContextKit` attempts to validate  permissions and see 
+other necessary conditions are met when initializing the engine. If any of these
+conditions are not met it will fail with an `error` that can be used to debug 
+the issue.
+
+One example of where a failure would occur would be location permissions
+not being enabled for the application.
 
 ### Destroying an engine.
 

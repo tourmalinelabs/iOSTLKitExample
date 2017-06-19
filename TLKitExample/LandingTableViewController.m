@@ -18,7 +18,7 @@
  * application of any third party copyright notice to that third party's
  * code.
  ******************************************************************************/
-
+#import <CommonCrypto/CommonDigest.h>
 #import "LandingTableViewController.h"
 #import "DrivesTableViewController.h"
 #import "CLLocation+Format.h"
@@ -31,8 +31,7 @@
 static NSString *const API_KEY  = @"bdf760a8dbf64e35832c47d8d8dffcc0";
 
 // Pre-registered user and password.
-static NSString *const USERNAME = @"example@tourmalinelabs.com";
-static NSString *const PASSWORD = @"password";
+static NSString *const USERNAME = @"iosexample@tourmalinelabs.com";
 
 // used to store the last monitoring state to user defaults
 static NSString *const MONITORING_STATE_KEY = @"MONITORING_STATE_KEY";
@@ -50,8 +49,7 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
 @property (assign, nonatomic) MonitoringState monitoringState;
 - (NSString *)monitoringStateString;
 - (void)stopMonitoring;
-- (void)startMonitoringAuto;
-- (void)startMonitoringManual;
+- (void)startMonitoring:(MonitoringState)monitoringState;
 @end
 
 @implementation LandingTableViewController
@@ -63,10 +61,10 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
         case MonitoringStateStop:
             break;
         case MonitoringStateAuto:
-            [self startMonitoringAuto];
+            [self startMonitoring: MonitoringStateAuto];
             break;
         case MonitoringStateManual:
-            [self startMonitoringManual];
+            [self startMonitoring:MonitoringStateManual];
             break;
         default:
             break;
@@ -112,36 +110,27 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
                                }];
 }
 
-- (void)startMonitoringAuto {
-    // check if not already initialized
-    if (CKContextKit.isInitialized) {
-        NSLog(@"TLKit is already started! (isMonitoring: %@ - mode: %@)",
-              CKContextKit.isMonitoring ? @"YES" : @"NO",
-              self.monitoringStateString);
-        return;
-    }
-    // initializes engine with automatic drive detection
-    __weak __typeof__(self) weakSelf = self;
-    [CKContextKit initAutomaticWithApiKey:API_KEY
-                                  authMgr:[[CKDefaultAuth alloc]
-                                      initWithApiKey:API_KEY
-                                              userId:USERNAME
-                                                pass:PASSWORD]
-                            launchOptions:nil
-                        withResultToQueue:dispatch_get_main_queue()
-                              withHandler:^(BOOL __unused successful,
-                                            NSError * _Nullable error) {
-                                  if (error) {
-                                      NSLog(@"Failed to start TLKit: %@", error);
-                                      return;
-                                  }
-                                  CKContextKit.isMonitoring = YES;
-                                  weakSelf.monitoringState = MonitoringStateAuto;
-                                  [weakSelf.tableView reloadData];
-                              }];
+-(NSString*)hashedId:(NSString*)uniqueId {
+    NSData *strData = [uniqueId dataUsingEncoding:NSUTF8StringEncoding];
+    NSMutableData *sha = [NSMutableData dataWithLength:CC_SHA256_DIGEST_LENGTH];
+
+    CC_SHA256(strData.bytes,
+        (unsigned int)strData.length,
+        (unsigned char*)sha.mutableBytes);
+
+    NSMutableString* hexStr = [NSMutableString string];
+
+    [sha enumerateByteRangesUsingBlock:^(const void *bytes, NSRange byteRange, BOOL *stop) {
+        for (NSUInteger i = 0; i < byteRange.length; ++i) {
+            [hexStr appendFormat:@"%02x", ((uint8_t*)bytes)[i]];
+        }
+    }];
+    return [hexStr uppercaseString];
+
 }
 
-- (void)startMonitoringManual {
+
+- (void)startMonitoring:(MonitoringState)monitoringState {
     // check if not already initialized
     if (CKContextKit.isInitialized) {
         NSLog(@"TLKit is already started! (isMonitoring: %@ - mode: %@)",
@@ -149,26 +138,28 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
               self.monitoringStateString);
         return;
     }
-    // initializes engine with manual drive detection
+
+    NSString* hashedId = [self hashedId:USERNAME];
+    // initializes engine with automatic drive detection
     __weak __typeof__(self) weakSelf = self;
-    [CKContextKit initManualWithApiKey:API_KEY
-                               authMgr:[[CKDefaultAuth alloc]
-                                   initWithApiKey:API_KEY
-                                           userId:USERNAME
-                                             pass:PASSWORD]
-                         launchOptions:nil
-                     withResultToQueue:dispatch_get_main_queue()
-                           withHandler:^(BOOL __unused successful,
-                                         NSError * _Nullable error) {
-                               if (error) {
-                                   NSLog(@"Failed to start TLKit: %@", error);
-                                   return;
-                               }
-                               CKContextKit.isMonitoring = YES;
-                               weakSelf.monitoringState = MonitoringStateManual;
-                               [weakSelf.tableView reloadData];
-                           }];
+    [CKContextKit initWithApiKey:API_KEY
+                        hashedId:hashedId
+                       automatic:monitoringState == MonitoringStateAuto
+                        launchOptions:nil
+                    withResultToQueue:dispatch_get_main_queue()
+                          withHandler:^(BOOL __unused successful,
+                              NSError * _Nullable error) {
+                              if (error) {
+                                  NSLog(@"Failed to start TLKit: %@", error);
+                                  return;
+                              }
+                              CKContextKit.isMonitoring = YES;
+                              weakSelf.monitoringState = monitoringState;
+                              [weakSelf.tableView reloadData];
+                          }];
+
 }
+
 
 #pragma mark - UITableViewDataSource
 
@@ -246,10 +237,10 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
                     [self stopMonitoring];
                     break;
                 case MonitoringStateAuto:
-                    [self startMonitoringAuto];
+                    [self startMonitoring:MonitoringStateAuto];
                     break;
                 case MonitoringStateManual:
-                    [self startMonitoringManual];
+                    [self startMonitoring:MonitoringStateManual];
                     break;
                 default:
                     break;
