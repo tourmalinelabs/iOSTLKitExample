@@ -104,7 +104,6 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
                                        NSLog(@"Failed to stop TLKit with error: %@", error);
                                        return;
                                    }
-                                   CKContextKit.isMonitoring = NO;
                                    weakSelf.monitoringState = MonitoringStateStop;
                                    [weakSelf.tableView reloadData];
                                }];
@@ -133,9 +132,8 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
 - (void)startMonitoring:(MonitoringState)monitoringState {
     // check if not already initialized
     if (CKContextKit.isInitialized) {
-        NSLog(@"TLKit is already started! (isMonitoring: %@ - mode: %@)",
-              CKContextKit.isMonitoring ? @"YES" : @"NO",
-              self.monitoringStateString);
+        NSLog(@"TLKit is already started! (mode: %@)",
+            self.monitoringStateString);
         return;
     }
 
@@ -153,7 +151,6 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
                                   NSLog(@"Failed to start TLKit: %@", error);
                                   return;
                               }
-                              CKContextKit.isMonitoring = YES;
                               weakSelf.monitoringState = monitoringState;
                               [weakSelf.tableView reloadData];
                           }];
@@ -178,7 +175,7 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
         }
         case 1: {
             BOOL enabled = NO;
-            if (CKContextKit.isMonitoring) {
+            if (CKContextKit.isInitialized) {
                 enabled = indexPath.row == MonitoringStateStop;
             } else {
                 enabled = indexPath.row != MonitoringStateStop;
@@ -210,8 +207,9 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
             break;
         }
         case 1: {
-            // avoid selecting stop if not monitoring or any start if monitoring
-            if (CKContextKit.isMonitoring) {
+            // avoid selecting stop if not initialized or any start if
+            // initialized
+            if (CKContextKit.isInitialized) {
                 if (indexPath.row != MonitoringStateStop) return nil;
             } else {
                 if (indexPath.row == MonitoringStateStop) return nil;
