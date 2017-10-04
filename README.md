@@ -34,8 +34,8 @@ pod init
 Open and edit the `Podfile` as follow:
 
 ```ruby
-source 'https://github.com/CocoaPods/Specs.git'
 source 'https://github.com/tourmalinelabs/iOSTLKitSDK.git'
+source 'https://github.com/CocoaPods/Specs.git'
 
 platform :ios, '9.0'
 
@@ -44,6 +44,9 @@ use_frameworks!
 pod 'TLKit'
 ...
 ```
+
+Notice that to avoid pod name conflicts, TLKit source url must be declared before 
+the Cocoapods repository.
 
 Finally, save and close the `Podfile` and run `pod install` to setup your 
 `CocoaPods` environment and import `TLKit` into your project. Make sure to start 
