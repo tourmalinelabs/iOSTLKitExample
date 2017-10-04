@@ -32,7 +32,11 @@
 		<true/>
 	</dict>
 	<key>NSLocationAlwaysUsageDescription</key>
-	<string>to monitor safe driving behavior.</string>
+	<string>TLKit needs location to monitor safe driving behavior.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>TLKit needs location to monitor safe driving behavior.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>TLKit may not work correctly with this permissions.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
