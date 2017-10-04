@@ -89,10 +89,11 @@ NS_ASSUME_NONNULL_END
     UIEdgeInsets contentInset = self.tableView.contentInset;
     UIEdgeInsets scrollIndicatorInsets = self.tableView.scrollIndicatorInsets;
     if (self.manual) {
-        CGFloat height = CGRectGetHeight(self.buttonStartDrive.bounds);
-        contentInset.bottom = height;
+        CGFloat inset = (CGRectGetMaxY(self.tableView.frame) -
+                         CGRectGetMinY(self.buttonStartDrive.frame));
+        contentInset.bottom = inset;
         self.tableView.contentInset = contentInset;
-        scrollIndicatorInsets.bottom = height;
+        scrollIndicatorInsets.bottom = inset;
         self.tableView.scrollIndicatorInsets = scrollIndicatorInsets;
         self.buttonStartDrive.hidden = NO;
     } else {

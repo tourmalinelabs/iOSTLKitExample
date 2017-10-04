@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12120" systemVersion="16E195" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="sVE-97-FSl">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="13196" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="sVE-97-FSl">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12088"/>
+        <deployment identifier="iOS"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13173"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <scenes>
@@ -28,7 +30,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Request Location Authorization" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="K6P-fp-PmT">
-                                                    <rect key="frame" x="15" y="0.0" width="345" height="43.5"/>
+                                                    <rect key="frame" x="16" y="0.0" width="344" height="43.5"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -49,7 +51,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Stop Monitoring" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="88X-VF-HEs">
-                                                    <rect key="frame" x="15" y="0.0" width="345" height="43.5"/>
+                                                    <rect key="frame" x="16" y="0.0" width="344" height="43.5"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -104,7 +106,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Locations" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="8xR-Vd-ZOF">
-                                                    <rect key="frame" x="15" y="0.0" width="325" height="43.5"/>
+                                                    <rect key="frame" x="16" y="0.0" width="324" height="43.5"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -124,7 +126,7 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="Drives" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" id="J5X-L1-aMp">
-                                                    <rect key="frame" x="15" y="0.0" width="325" height="43.5"/>
+                                                    <rect key="frame" x="16" y="0.0" width="324" height="43.5"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -154,10 +156,6 @@
         <scene sceneID="PUJ-oQ-YE5">
             <objects>
                 <viewController id="7Y5-di-kXx" customClass="DrivesTableViewController" sceneMemberID="viewController">
-                    <layoutGuides>
-                        <viewControllerLayoutGuide type="top" id="X3q-9t-hGW"/>
-                        <viewControllerLayoutGuide type="bottom" id="016-Tl-ujN"/>
-                    </layoutGuides>
                     <view key="view" contentMode="scaleToFill" id="D06-St-ivG">
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
@@ -242,7 +240,7 @@
                                                 <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Kdo-qY-B8f">
                                                     <rect key="frame" x="307" y="190" width="60" height="30"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMinX="YES" flexibleMinY="YES"/>
-                                                    <color key="backgroundColor" red="0.94901960780000005" green="0.53725490200000003" blue="0.0078431372550000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <color key="backgroundColor" red="1" green="0.4039215686" blue="0.1058823529" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                                                     <state key="normal" title="STOP"/>
                                                     <connections>
@@ -308,13 +306,14 @@
                                 </connections>
                             </tableView>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="nRX-Jx-3go">
-                                <rect key="frame" x="0.0" y="615" width="375" height="52"/>
-                                <color key="backgroundColor" red="0.94901960780000005" green="0.53725490200000003" blue="0.0078431372550000003" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                <rect key="frame" x="0.0" y="615" width="375" height="86"/>
+                                <color key="backgroundColor" red="1" green="0.40392156862745099" blue="0.10588235294117647" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <constraints>
-                                    <constraint firstAttribute="height" constant="52" id="aOC-2l-KBV"/>
+                                    <constraint firstAttribute="height" constant="86" id="aOC-2l-KBV"/>
                                 </constraints>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
+                                <inset key="titleEdgeInsets" minX="0.0" minY="0.0" maxX="0.0" maxY="34"/>
                                 <state key="normal" title="Start Drive"/>
                                 <connections>
                                     <action selector="onButtonStartDrive:" destination="7Y5-di-kXx" eventType="touchUpInside" id="npk-XG-ksA"/>
@@ -323,14 +322,15 @@
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="016-Tl-ujN" firstAttribute="top" secondItem="nRX-Jx-3go" secondAttribute="bottom" id="0ik-HZ-Gsx"/>
-                            <constraint firstItem="016-Tl-ujN" firstAttribute="top" secondItem="KKq-ly-c5L" secondAttribute="bottom" id="98D-Fr-koR"/>
-                            <constraint firstItem="KKq-ly-c5L" firstAttribute="top" secondItem="X3q-9t-hGW" secondAttribute="bottom" constant="-64" id="Igw-NQ-Npa"/>
-                            <constraint firstAttribute="trailing" secondItem="nRX-Jx-3go" secondAttribute="trailing" id="LM5-f9-MW2"/>
-                            <constraint firstAttribute="trailing" secondItem="KKq-ly-c5L" secondAttribute="trailing" id="W75-QA-ers"/>
-                            <constraint firstItem="KKq-ly-c5L" firstAttribute="leading" secondItem="D06-St-ivG" secondAttribute="leading" id="XcX-O5-9hM"/>
-                            <constraint firstItem="nRX-Jx-3go" firstAttribute="leading" secondItem="D06-St-ivG" secondAttribute="leading" id="pku-7W-Kcw"/>
+                            <constraint firstItem="Gpq-3d-Sxj" firstAttribute="bottom" secondItem="nRX-Jx-3go" secondAttribute="bottom" constant="-34" id="0ik-HZ-Gsx"/>
+                            <constraint firstAttribute="bottom" secondItem="KKq-ly-c5L" secondAttribute="bottom" id="98D-Fr-koR"/>
+                            <constraint firstItem="KKq-ly-c5L" firstAttribute="top" secondItem="Gpq-3d-Sxj" secondAttribute="top" constant="-64" id="Igw-NQ-Npa"/>
+                            <constraint firstItem="Gpq-3d-Sxj" firstAttribute="trailing" secondItem="nRX-Jx-3go" secondAttribute="trailing" id="LM5-f9-MW2"/>
+                            <constraint firstItem="Gpq-3d-Sxj" firstAttribute="trailing" secondItem="KKq-ly-c5L" secondAttribute="trailing" id="W75-QA-ers"/>
+                            <constraint firstItem="KKq-ly-c5L" firstAttribute="leading" secondItem="Gpq-3d-Sxj" secondAttribute="leading" id="XcX-O5-9hM"/>
+                            <constraint firstItem="nRX-Jx-3go" firstAttribute="leading" secondItem="Gpq-3d-Sxj" secondAttribute="leading" id="pku-7W-Kcw"/>
                         </constraints>
+                        <viewLayoutGuide key="safeArea" id="Gpq-3d-Sxj"/>
                     </view>
                     <navigationItem key="navigationItem" title="Drives" id="8yj-fR-se2"/>
                     <connections>
@@ -423,10 +423,10 @@
                 <navigationController automaticallyAdjustsScrollViewInsets="NO" id="sVE-97-FSl" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" barStyle="black" id="XFA-FI-P4L">
-                        <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>
+                        <rect key="frame" x="0.0" y="20" width="375" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
                         <color key="tintColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
-                        <color key="barTintColor" red="0.94901960784313721" green="0.53725490196078429" blue="0.0078431372549019607" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="barTintColor" red="0.25490196078431371" green="0.25098039215686274" blue="0.25882352941176467" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                     </navigationBar>
                     <nil name="viewControllers"/>
                     <connections>
