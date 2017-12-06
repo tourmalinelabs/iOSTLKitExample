@@ -19,15 +19,8 @@
  * code.
  ******************************************************************************/
 
-#import <TLKit/CKLocation.h>
+#import <UIKit/UIKit.h>
 
-NS_ASSUME_NONNULL_BEGIN
+@interface TelematicsTableViewController : UITableViewController
 
-@interface CKLocation (Format)
-- (NSString *)formattedLocation;
-- (NSString *)formattedTime;
-- (NSString *)formattedAddress;
-- (NSString *)formattedState;
 @end
-
-NS_ASSUME_NONNULL_END

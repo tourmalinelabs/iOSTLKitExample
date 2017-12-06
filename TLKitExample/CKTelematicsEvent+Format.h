@@ -19,15 +19,20 @@
  * code.
  ******************************************************************************/
 
-#import <TLKit/CKLocation.h>
+#import <TLKit/CKTelematicsEvent.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CKLocation (Format)
-- (NSString *)formattedLocation;
+@interface CKTelematicsEvent (Format)
+
+- (NSString *)formattedTripID;
+- (NSString *)formattedType;
 - (NSString *)formattedTime;
-- (NSString *)formattedAddress;
-- (NSString *)formattedState;
+- (NSString *)formattedDuration;
+- (NSString *)formattedCoordinate;
+- (NSString *)formattedSpeed;
+- (NSString *)formattedSeverity;
+
 @end
 
 NS_ASSUME_NONNULL_END

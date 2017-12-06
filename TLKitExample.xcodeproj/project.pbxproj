@@ -17,6 +17,9 @@
 		69F4FC041C28827300FB6DA7 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 69F4FC021C28827300FB6DA7 /* Main.storyboard */; };
 		69F4FC091C28827300FB6DA7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 69F4FC071C28827300FB6DA7 /* LaunchScreen.storyboard */; };
 		CB2A2E541E7BE46400E5D9AC /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CB2A2E531E7BE46400E5D9AC /* Images.xcassets */; };
+		CB6073E01FD7FACD00B88242 /* TelematicsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB6073DF1FD7FACD00B88242 /* TelematicsTableViewController.m */; };
+		CB6073E31FD802C900B88242 /* TelematicsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CB6073E21FD802C900B88242 /* TelematicsCell.m */; };
+		CB6073E61FD8253E00B88242 /* CKTelematicsEvent+Format.m in Sources */ = {isa = PBXBuildFile; fileRef = CB6073E51FD8253E00B88242 /* CKTelematicsEvent+Format.m */; };
 		CBEA100D1EB1F97800DAC826 /* DriveCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CBEA100C1EB1F97800DAC826 /* DriveCell.m */; };
 		CBEA10111EB211B900DAC826 /* NSDate+Format.m in Sources */ = {isa = PBXBuildFile; fileRef = CBEA10101EB211B900DAC826 /* NSDate+Format.m */; };
 		CBEA10171EB2153F00DAC826 /* CKDrive+Format.m in Sources */ = {isa = PBXBuildFile; fileRef = CBEA10161EB2153F00DAC826 /* CKDrive+Format.m */; };
@@ -45,6 +48,12 @@
 		69F4FC0A1C28827300FB6DA7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		91CDCFF3241EEF3CA24AFC0C /* Pods-TLKitExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TLKitExample.release.xcconfig"; path = "Pods/Target Support Files/Pods-TLKitExample/Pods-TLKitExample.release.xcconfig"; sourceTree = "<group>"; };
 		CB2A2E531E7BE46400E5D9AC /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Images.xcassets; sourceTree = "<group>"; };
+		CB6073DE1FD7FACD00B88242 /* TelematicsTableViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TelematicsTableViewController.h; sourceTree = "<group>"; };
+		CB6073DF1FD7FACD00B88242 /* TelematicsTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TelematicsTableViewController.m; sourceTree = "<group>"; };
+		CB6073E11FD802C900B88242 /* TelematicsCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TelematicsCell.h; sourceTree = "<group>"; };
+		CB6073E21FD802C900B88242 /* TelematicsCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TelematicsCell.m; sourceTree = "<group>"; };
+		CB6073E41FD8253E00B88242 /* CKTelematicsEvent+Format.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CKTelematicsEvent+Format.h"; sourceTree = "<group>"; };
+		CB6073E51FD8253E00B88242 /* CKTelematicsEvent+Format.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "CKTelematicsEvent+Format.m"; sourceTree = "<group>"; };
 		CBEA100B1EB1F97800DAC826 /* DriveCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DriveCell.h; sourceTree = "<group>"; };
 		CBEA100C1EB1F97800DAC826 /* DriveCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DriveCell.m; sourceTree = "<group>"; };
 		CBEA100F1EB211B900DAC826 /* NSDate+Format.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDate+Format.h"; sourceTree = "<group>"; };
@@ -96,8 +105,9 @@
 		69F276991C29D7F7009A7126 /* TLKit Features */ = {
 			isa = PBXGroup;
 			children = (
-				69F2769A1C29D816009A7126 /* Drive Monitoring */,
 				69F2769C1C29D847009A7126 /* Location Monitoring */,
+				69F2769A1C29D816009A7126 /* Drive Monitoring */,
+				CB6073DD1FD7FA8E00B88242 /* Telematics Monitoring */,
 			);
 			name = "TLKit Features";
 			sourceTree = "<group>";
@@ -168,6 +178,17 @@
 			name = "Supporting Files";
 			sourceTree = "<group>";
 		};
+		CB6073DD1FD7FA8E00B88242 /* Telematics Monitoring */ = {
+			isa = PBXGroup;
+			children = (
+				CB6073DE1FD7FACD00B88242 /* TelematicsTableViewController.h */,
+				CB6073DF1FD7FACD00B88242 /* TelematicsTableViewController.m */,
+				CB6073E11FD802C900B88242 /* TelematicsCell.h */,
+				CB6073E21FD802C900B88242 /* TelematicsCell.m */,
+			);
+			name = "Telematics Monitoring";
+			sourceTree = "<group>";
+		};
 		CBEA100E1EB210A200DAC826 /* Helpers */ = {
 			isa = PBXGroup;
 			children = (
@@ -179,6 +200,8 @@
 				CBEA10191EB218C100DAC826 /* CKLocation+Format.m */,
 				CBEA101B1EB21BB500DAC826 /* CLLocation+Format.h */,
 				CBEA101C1EB21BB500DAC826 /* CLLocation+Format.m */,
+				CB6073E41FD8253E00B88242 /* CKTelematicsEvent+Format.h */,
+				CB6073E51FD8253E00B88242 /* CKTelematicsEvent+Format.m */,
 			);
 			name = Helpers;
 			sourceTree = "<group>";
@@ -321,6 +344,8 @@
 				69F4FBFE1C28827300FB6DA7 /* AppDelegate.m in Sources */,
 				69F4FBFB1C28827300FB6DA7 /* main.m in Sources */,
 				69F276971C29D791009A7126 /* DrivesTableViewController.m in Sources */,
+				CB6073E61FD8253E00B88242 /* CKTelematicsEvent+Format.m in Sources */,
+				CB6073E01FD7FACD00B88242 /* TelematicsTableViewController.m in Sources */,
 				CBEA101D1EB21BB500DAC826 /* CLLocation+Format.m in Sources */,
 				CBEA10201EB21FDE00DAC826 /* LocationCell.m in Sources */,
 				CBEA10111EB211B900DAC826 /* NSDate+Format.m in Sources */,
@@ -328,6 +353,7 @@
 				CBEA101A1EB218C100DAC826 /* CKLocation+Format.m in Sources */,
 				CBEA10171EB2153F00DAC826 /* CKDrive+Format.m in Sources */,
 				69F276A31C29DC38009A7126 /* LocationsTableViewController.m in Sources */,
+				CB6073E31FD802C900B88242 /* TelematicsCell.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

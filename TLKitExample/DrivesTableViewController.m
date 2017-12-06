@@ -73,7 +73,7 @@ NS_ASSUME_NONNULL_END
 }
 
 - (void)dealloc {
-    // stop drive mpnitoring
+    // stop drive monitoring
     [self stopDriveMonitoring];
     // dismiss progress i needed
     [SVProgressHUD dismiss];

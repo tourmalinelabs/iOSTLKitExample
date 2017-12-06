@@ -19,15 +19,34 @@
  * code.
  ******************************************************************************/
 
-#import <TLKit/CKLocation.h>
+#import "TelematicsCell.h"
+#import "CKTelematicsEvent+Format.h"
 
-NS_ASSUME_NONNULL_BEGIN
-
-@interface CKLocation (Format)
-- (NSString *)formattedLocation;
-- (NSString *)formattedTime;
-- (NSString *)formattedAddress;
-- (NSString *)formattedState;
+@interface TelematicsCell ()
+// IBOutlets
+@property (weak, nonatomic) IBOutlet UILabel *labelTripId;
+@property (weak, nonatomic) IBOutlet UILabel *labelType;
+@property (weak, nonatomic) IBOutlet UILabel *labelTime;
+@property (weak, nonatomic) IBOutlet UILabel *labelDuration;
+@property (weak, nonatomic) IBOutlet UILabel *labelCoordinate;
+@property (weak, nonatomic) IBOutlet UILabel *labelSpeed;
+@property (weak, nonatomic) IBOutlet UILabel *labelSeverity;
 @end
 
-NS_ASSUME_NONNULL_END
+@implementation TelematicsCell
+
+- (void)awakeFromNib {
+    [super awakeFromNib];
+}
+
+- (void)configureCellWithTelematicsEvent:(CKTelematicsEvent *)event {
+    self.labelTripId.text     = event.formattedTripID;
+    self.labelType.text       = event.formattedType;
+    self.labelTime.text       = event.formattedTime;
+    self.labelDuration.text   = event.formattedDuration;
+    self.labelCoordinate.text = event.formattedCoordinate;
+    self.labelSpeed.text      = event.formattedSpeed;
+    self.labelSeverity.text   = event.formattedSeverity;
+}
+
+@end

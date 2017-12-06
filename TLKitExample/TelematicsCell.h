@@ -19,15 +19,14 @@
  * code.
  ******************************************************************************/
 
-#import <TLKit/CKLocation.h>
+#import <UIKit/UIKit.h>
+
+@class CKTelematicsEvent;
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface CKLocation (Format)
-- (NSString *)formattedLocation;
-- (NSString *)formattedTime;
-- (NSString *)formattedAddress;
-- (NSString *)formattedState;
+@interface TelematicsCell : UITableViewCell
+- (void)configureCellWithTelematicsEvent:(CKTelematicsEvent *)event;
 @end
 
 NS_ASSUME_NONNULL_END

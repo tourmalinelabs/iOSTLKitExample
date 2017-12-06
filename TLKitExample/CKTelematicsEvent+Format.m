@@ -19,15 +19,45 @@
  * code.
  ******************************************************************************/
 
-#import <TLKit/CKLocation.h>
+#import "CKTelematicsEvent+Format.h"
+#import "NSDate+Format.h"
 
-NS_ASSUME_NONNULL_BEGIN
+@implementation CKTelematicsEvent (Format)
 
-@interface CKLocation (Format)
-- (NSString *)formattedLocation;
-- (NSString *)formattedTime;
-- (NSString *)formattedAddress;
-- (NSString *)formattedState;
+- (NSString *)formattedTripID {
+    return [NSString stringWithFormat:@"Trip ID: %@",
+            self.tripId.UUIDString];
+}
+
+- (NSString *)formattedType {
+    return [NSString stringWithFormat:@"Type: %@",
+            self.typeStr];
+}
+
+- (NSString *)formattedTime {
+    return [NSString stringWithFormat:@"Time: %@",
+            [self.time formattedDateTimeWithTimeZone:self.timeZone]];
+}
+
+- (NSString *)formattedDuration {
+    return [NSString stringWithFormat:@"Duration (seconds): %f",
+            self.duration];
+}
+
+- (NSString *)formattedCoordinate {
+    return [NSString stringWithFormat:@"Coordinate: %f, %f",
+            self.latitude,
+            self.longitude];
+}
+
+- (NSString *)formattedSpeed {
+    return [NSString stringWithFormat:@"Speed: %f",
+            self.speed];
+}
+
+- (NSString *)formattedSeverity {
+    return [NSString stringWithFormat:@"Severity: %f",
+            self.severity];
+}
+
 @end
-
-NS_ASSUME_NONNULL_END
