@@ -26,6 +26,7 @@ NS_ASSUME_NONNULL_BEGIN
 @interface CLLocation (Format)
 - (NSString *)formattedLatLon;
 + (NSString *)formattedAuthorization;
++ (NSString *)formattedAuthorizationDetail;
 @end
 
 NS_ASSUME_NONNULL_END

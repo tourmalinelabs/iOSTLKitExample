@@ -57,6 +57,9 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    self.clLocationManager = CLLocationManager.new;
+    self.clLocationManager.delegate = self;
+    
     switch (self.monitoringState) {
         case MonitoringStateStop:
             break;
@@ -128,7 +131,6 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
 
 }
 
-
 - (void)startMonitoring:(MonitoringState)monitoringState {
     // check if not already initialized
     if (CKContextKit.isInitialized) {
@@ -154,9 +156,7 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
                               weakSelf.monitoringState = monitoringState;
                               [weakSelf.tableView reloadData];
                           }];
-
 }
-
 
 #pragma mark - UITableViewDataSource
 
@@ -170,7 +170,15 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
     switch (indexPath.section) {
         case 0: {
             cell.textLabel.text = CLLocation.formattedAuthorization;
-            cell.selectionStyle = CLLocationManager.authorizationStatus == kCLAuthorizationStatusNotDetermined ? UITableViewCellSelectionStyleDefault : UITableViewCellSelectionStyleNone;
+            CLAuthorizationStatus authorizationStatus = CLLocationManager.authorizationStatus;
+            if (authorizationStatus == kCLAuthorizationStatusNotDetermined ||
+                authorizationStatus == kCLAuthorizationStatusAuthorizedAlways) {
+                cell.selectionStyle = UITableViewCellSelectionStyleNone;
+                cell.accessoryType  = UITableViewCellAccessoryNone;
+            } else {
+                cell.selectionStyle = UITableViewCellSelectionStyleDefault;
+                cell.accessoryType  = UITableViewCellAccessoryDetailButton;
+            }
             break;
         }
         case 1: {
@@ -194,7 +202,13 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
 }
 
 - (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section {
-    return section == 1 ? [NSString stringWithFormat:@"TLKit state: %@", self.monitoringStateString] : nil;
+    switch (section) {
+        case 0: return CLLocation.formattedAuthorizationDetail;
+        case 1: return [NSString stringWithFormat:@"TLKit state: %@", self.monitoringStateString];
+        default:
+            break;
+    }
+    return nil;
 }
 
 #pragma mark - UITableViewDelegate
@@ -202,8 +216,8 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
 - (NSIndexPath *)tableView:(UITableView *)tableView willSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     switch (indexPath.section) {
         case 0: {
-            // enable selection only for requesting authorization
-            if (CLLocationManager.authorizationStatus != kCLAuthorizationStatusNotDetermined) return nil;
+            // enable selection when authorization is not always
+            if (CLLocationManager.authorizationStatus == kCLAuthorizationStatusAuthorizedAlways) return nil;
             break;
         }
         case 1: {
@@ -222,11 +236,21 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
     return indexPath;
 }
 
+- (void)tableView:(UITableView *)tableView accessoryButtonTappedForRowWithIndexPath:(NSIndexPath *)indexPath {
+    if (indexPath.section == 0) {
+        [self openSettings];
+    }
+}
+
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath {
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     switch (indexPath.section) {
         case 0: {
-            [self requestLocationPermissions];
+            if (CLLocationManager.authorizationStatus == kCLAuthorizationStatusNotDetermined) {
+                [self requestLocationPermissions];
+            } else {
+                [self openSettings];
+            }
             break;
         }
         case 1: {
@@ -252,15 +276,13 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
 
 - (void)requestLocationPermissions {
     if (CLLocationManager.authorizationStatus == kCLAuthorizationStatusNotDetermined) {
-        // Request "Always" Location permissions
-        self.clLocationManager = CLLocationManager.new;
-        self.clLocationManager.delegate = self;
-        if ([self.clLocationManager respondsToSelector:@selector(requestAlwaysAuthorization)]) {
-            [self.clLocationManager requestAlwaysAuthorization];
-        } else {
-            [self.clLocationManager startUpdatingLocation];
-        }
+        [self.clLocationManager requestAlwaysAuthorization];
     }
+}
+
+- (void)openSettings {
+    NSURL *url = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
+    [UIApplication.sharedApplication openURL:url];
 }
 
 #pragma mark - CLLocationManagerDelegate
