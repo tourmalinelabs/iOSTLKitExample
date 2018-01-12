@@ -186,7 +186,73 @@ those cases, the engine can be destroyed as follows:
 
 `CKContextKit` utilizes GPS as one of it's context sensor. As such it is
 best practice to request "Always" authorization from the user for
-accesssing location prior to initializing the engine.
+accessing location prior to initializing the engine.
+
+#### Detecting authorization changes
+
+`CKContextKit` requires "Always" location authorization to detect drives correctly. As at any time the user may change location authorization from the Settings it can be useful to detect this changes in the app.
+
+The below example demonstrates how to detect location authorization changes.
+
+```objc
+#import <CoreLocation/CoreLocation.h>
+
+@interface Example: NSObject<CLLocationManagerDelegate>
+@property (strong, nonatomic) CLLocationManager *locationManager;
+@end
+```
+
+```objc
+@implementation Example
+
+- (instancetype)init {
+    self = [super init];
+    if (self) {
+        self.locationManager = [CLLocationManager new];
+        self.locationManager.delegate = self;        
+    }
+    return self;
+}
+
+- (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
+    switch (status) {
+        case kCLAuthorizationStatusNotDetermined: {
+            // User has not yet made a choice with regards to this application
+            break;
+        }
+        case kCLAuthorizationStatusDenied:{
+            // User has explicitly denied authorization for this application, or
+            // location services are disabled in Settings.
+            break;
+        }
+        case kCLAuthorizationStatusAuthorizedAlways:{
+            // User has granted authorization to use their location at any time,
+            // including monitoring for regions, visits, or significant location changes.
+            break;
+        }
+        case kCLAuthorizationStatusAuthorizedWhenInUse:{
+            // User has granted authorization to use their location only when your app
+            // is visible to them (it will be made visible to them if you continue to
+            // receive location updates while in the background).  Authorization to use
+            // launch APIs has not been granted.
+            break;
+        }
+        break;
+    }
+}
+
+@end
+```
+
+#### Requesting "Always" location authorization
+
+The code below demonstrates how to request "Always" locations authorization.
+
+```objc
+if (CLLocationManager.authorizationStatus == kCLAuthorizationStatusNotDetermined) {
+    [self.locationManager requestAlwaysAuthorization];
+}
+```
 
 ## Drive Monitoring
 
@@ -410,4 +476,3 @@ Your TLKit Cocoapod is out of date it can be updated as follows:
 ```bash
 pod update TLKit
 ```
-

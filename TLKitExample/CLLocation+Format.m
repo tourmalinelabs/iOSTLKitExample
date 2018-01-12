@@ -32,15 +32,31 @@
 + (NSString *)formattedAuthorization {
     switch (CLLocationManager.authorizationStatus) {
         case kCLAuthorizationStatusNotDetermined:
-            return @"Request Location Authorization";
+            return @"Request authorization";
         case kCLAuthorizationStatusAuthorizedAlways:
-            return @"Authorized Always";
+            return @"Authorized 'Always'";
+        case kCLAuthorizationStatusAuthorizedWhenInUse:
+            return @"Authorized 'Only When In Use'";
         case kCLAuthorizationStatusDenied:
-            return @"Not Authorized";
+            return @"Authorized 'Never'";
         default:
             break;
     }
     return @"?";
+}
+
++ (NSString *)formattedAuthorizationDetail {
+    switch (CLLocationManager.authorizationStatus) {
+        case kCLAuthorizationStatusNotDetermined:
+            return @"TLKit needs location to monitor safe driving behavior.";
+        case kCLAuthorizationStatusAuthorizedAlways:
+            return nil;
+        default:
+            break;
+    }
+    return @"TLKit may not work correctly with this permissions."
+    " Please go to 'Settings/Privacy/Location Services/TLKitExample'"
+    " and allow 'Always' location access";
 }
 
 @end
