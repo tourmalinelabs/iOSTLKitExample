@@ -23,6 +23,7 @@
 #import "TelematicsCell.h"
 #import <TLKit/CKActivityManager.h>
 #import <TLKit/CKTelematicsEvent.h>
+#import <TLKit/CKActivity.h>
 
 @import SVProgressHUD;
 
@@ -100,37 +101,72 @@ NS_ASSUME_NONNULL_END
 
 - (void)queryTelematicsEvents {
     // show progress
+    [SVProgressHUD setMinimumDismissTimeInterval:1.0f];
     [SVProgressHUD show];
     
     __weak __typeof__(self) weakSelf = self;
     
-    CKPaginatedResultHandler handler =
-    ^(NSUInteger currentPage, NSUInteger pageCount, NSUInteger resultCount,
-      NSArray * _Nullable results, NSError * _Nullable error) {
-        [SVProgressHUD dismiss];
+    void(^QueryTelematicsForTrip)(NSUUID *tripId) = ^(NSUUID *tripId) {
         
-        // handle error
-        if (error) {
-            NSLog(@"Query Telematics failed with error: %@",
-                  error);
+        if (!weakSelf) {
+            [SVProgressHUD dismiss];
             return;
         }
         
-        NSLog(@"Query Telematics events result: %@", results);
-        if (!weakSelf) return;
-        
-        // holds events and reload table view
-        weakSelf.events = results;
-        [weakSelf.tableView reloadData];
+        [weakSelf.activityManager queryTelematicsEventsForTrip:tripId
+                                                       toQueue:dispatch_get_main_queue()
+                                                   withHandler:^(NSArray * _Nullable results, NSError * _Nullable error) {
+                                                       [SVProgressHUD dismiss];
+                                                       
+                                                       // handle error
+                                                       if (error) {
+                                                           NSLog(@"Query Telematics failed with error: %@",
+                                                                 error);
+                                                           return;
+                                                       }
+                                                       
+                                                       NSLog(@"Query Telematics events result: %@", results);
+                                                       if (!weakSelf) return;
+                                                       
+                                                       if (results.count == 0) {
+                                                           [SVProgressHUD showInfoWithStatus:@"No Data"];
+                                                       }
+                                                       
+                                                       // holds events and reload table view
+                                                       weakSelf.events = results;
+                                                       [weakSelf.tableView reloadData];
+                                               }];
     };
     
-    // query drives last 50 results
-    [self.activityManager queryTelematicsEventsFromDate:NSDate.distantPast
-                                                 toDate:NSDate.distantFuture
-                                                   page:1
-                                         resultsPerPage:50
-                                                toQueue:dispatch_get_main_queue()
-                                            withHandler:handler];
+  
+    [self.activityManager queryDrivesFromDate:NSDate.distantPast
+                                       toDate:NSDate.distantFuture
+                                    withLimit:1
+                                      toQueue:dispatch_get_main_queue()
+                                  withHandler:^(NSArray<__kindof CKActivity *> * _Nullable activities, NSError * _Nullable err) {
+                                      if (!weakSelf) {
+                                          [SVProgressHUD dismiss];
+                                          return;
+                                      }
+                                      
+                                      // handle error
+                                      if (err) {
+                                          NSLog(@"Query Drives failed with error: %@", err);
+                                          [SVProgressHUD showErrorWithStatus:@"Query Drives failed"];
+                                          return;
+                                      }
+                                      // no data to display
+                                      if (activities.count == 0) {
+                                          [SVProgressHUD showInfoWithStatus:@"No Data"];
+                                          return;
+                                      }
+                                      
+                                      // query telematics for the latest drive
+                                      QueryTelematicsForTrip(activities.firstObject.id);
+                                  }];
+    
+    
+    
 }
 
 #pragma mark - Table view data source

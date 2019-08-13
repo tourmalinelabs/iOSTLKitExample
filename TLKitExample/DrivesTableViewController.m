@@ -182,7 +182,7 @@ NS_ASSUME_NONNULL_END
     
     __weak __typeof__(self) weakSelf = self;
     // query drives since last week with a limit of max 50 results
-    [self.activityManager queryDrivesFromDate:[NSDate.date dateByAddingTimeInterval:-7*24*60*60]
+    [self.activityManager queryDrivesFromDate:NSDate.distantPast
                                        toDate:NSDate.distantFuture
                                     withLimit:50
                                       toQueue:dispatch_get_main_queue()

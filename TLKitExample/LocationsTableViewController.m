@@ -89,7 +89,7 @@
     
     __weak __typeof__(self) weakSelf = self;
     // query locations since last week with a limit of max 50 results
-    [self.locationManager queryLocationsFromDate:[NSDate.date dateByAddingTimeInterval:-7*24*60*60]
+    [self.locationManager queryLocationsFromDate:NSDate.distantPast
                                           toDate:NSDate.distantFuture
                                        withLimit:50
                                          toQueue:dispatch_get_main_queue()

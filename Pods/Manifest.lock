@@ -1,21 +1,21 @@
 PODS:
   - SVProgressHUD (2.2.1)
-  - TLKit (12.0.18061800)
+  - TLKit (14.4.19080901)
 
 DEPENDENCIES:
   - SVProgressHUD
   - TLKit
 
 SPEC REPOS:
-  https://github.com/CocoaPods/Specs.git:
+  https://github.com/cocoapods/specs.git:
     - SVProgressHUD
   https://github.com/tourmalinelabs/iOSTLKitSDK.git:
     - TLKit
 
 SPEC CHECKSUMS:
   SVProgressHUD: db27c54e6e18bc903341661fc9feb55e04905cc4
-  TLKit: a1f01d93ea7aee16ef4b5a39660a09830d2788f1
+  TLKit: 3d619c907367cea8fa78d6d7eb0e1ec6ee97673c
 
 PODFILE CHECKSUM: 78c7fc60ce1a6fe3c436a30773eabeec2f8a3f27
 
-COCOAPODS: 1.5.0
+COCOAPODS: 1.5.3

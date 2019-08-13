@@ -26,6 +26,8 @@
 #import <TLKit/CKContextKit.h>
 #import <TLKit/CKAuthenticationManagerDelegate.h>
 #import <TLKit/CKDefaultAuth.h>
+#import <TLKit/CKActivityManager.h>
+#import <TLKit/CKTelematicsEvent.h>
 
 // API Key usually should be kept on server.
 static NSString *const API_KEY  = @"bdf760a8dbf64e35832c47d8d8dffcc0";
@@ -33,23 +35,15 @@ static NSString *const API_KEY  = @"bdf760a8dbf64e35832c47d8d8dffcc0";
 // Pre-registered user and password.
 static NSString *const USERNAME = @"iosexample@tourmalinelabs.com";
 
-// used to store the last monitoring state to user defaults
-static NSString *const MONITORING_STATE_KEY = @"MONITORING_STATE_KEY";
-
-#pragma mark - MonitoringState enumeration values
-typedef NS_ENUM(NSUInteger, MonitoringState) {
-    MonitoringStateStop,
-    MonitoringStateAuto,
-    MonitoringStateManual,
-    __MonitoringStateCount__, // Don't touch me!
-};
+// used to store the last monitoring mode to user defaults
+static NSString *const MONITORING_MODE_KEY = @"MONITORING_MODE_KEY";
 
 @interface LandingTableViewController () <CLLocationManagerDelegate>
 @property (strong, nonatomic) CLLocationManager *clLocationManager;
-@property (assign, nonatomic) MonitoringState monitoringState;
-- (NSString *)monitoringStateString;
-- (void)stopMonitoring;
-- (void)startMonitoring:(MonitoringState)monitoringState;
+@property (assign, nonatomic) CKMonitoringMode mode;
+- (NSString *)monitoringModeString;
+- (void)startTLKit;
+- (void)stopTLKit;
 @end
 
 @implementation LandingTableViewController
@@ -57,48 +51,43 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
 - (void)viewDidLoad {
     [super viewDidLoad];
     
+    NSUserDefaults *standardUserDefaults = NSUserDefaults.standardUserDefaults;
+    [standardUserDefaults registerDefaults:@{ MONITORING_MODE_KEY: @(CKMonitoringModeAutomatic) }];
+    [standardUserDefaults synchronize];
+    
     self.clLocationManager = CLLocationManager.new;
     self.clLocationManager.delegate = self;
-    
-    switch (self.monitoringState) {
-        case MonitoringStateStop:
-            break;
-        case MonitoringStateAuto:
-            [self startMonitoring: MonitoringStateAuto];
-            break;
-        case MonitoringStateManual:
-            [self startMonitoring:MonitoringStateManual];
-            break;
-        default:
-            break;
+
+    if (self.mode != CKMonitoringModeUnmonitored) {
+        [self startTLKit];
     }
 }
 
-- (MonitoringState)monitoringState {
-    return [NSUserDefaults.standardUserDefaults integerForKey:MONITORING_STATE_KEY];
+- (CKMonitoringMode)mode {
+    return [NSUserDefaults.standardUserDefaults integerForKey:MONITORING_MODE_KEY];
 }
 
-- (void)setMonitoringState:(MonitoringState)monitoringState {
+- (void)setMode:(CKMonitoringMode)mode {
     NSUserDefaults *standardUserDefaults = NSUserDefaults.standardUserDefaults;
-    [standardUserDefaults setInteger:monitoringState forKey:MONITORING_STATE_KEY];
+    [standardUserDefaults setInteger:mode forKey:MONITORING_MODE_KEY];
     [standardUserDefaults synchronize];
 }
 
-- (NSString *)monitoringStateString {
-    switch (self.monitoringState) {
-        case MonitoringStateStop:
-            return @"Not monitoring";
-        case MonitoringStateAuto:
+- (NSString *)monitoringModeString {
+    switch (self.mode) {
+        case CKMonitoringModeAutomatic:
             return @"Automatic Monitoring";
-        case MonitoringStateManual:
+        case CKMonitoringModeManual:
             return @"Manual Monitoring";
+        case CKMonitoringModeUnmonitored:
+            return @"Not monitoring";
         default:
             break;
     }
     return @"?";
 }
 
-- (void)stopMonitoring {
+- (void)stopTLKit { 
     // destroy engine
     __weak __typeof__(self) weakSelf = self;
     [CKContextKit destroyWithResultToQueue:dispatch_get_main_queue()
@@ -107,12 +96,11 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
                                        NSLog(@"Failed to stop TLKit with error: %@", error);
                                        return;
                                    }
-                                   weakSelf.monitoringState = MonitoringStateStop;
                                    [weakSelf.tableView reloadData];
                                }];
 }
 
--(NSString*)hashedId:(NSString*)uniqueId {
+- (NSString *)hashedId:(NSString *)uniqueId {
     NSData *strData = [uniqueId dataUsingEncoding:NSUTF8StringEncoding];
     NSMutableData *sha = [NSMutableData dataWithLength:CC_SHA256_DIGEST_LENGTH];
 
@@ -131,11 +119,11 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
 
 }
 
-- (void)startMonitoring:(MonitoringState)monitoringState {
+- (void)startTLKit {
     // check if not already initialized
     if (CKContextKit.isInitialized) {
         NSLog(@"TLKit is already started! (mode: %@)",
-            self.monitoringStateString);
+            self.monitoringModeString);
         return;
     }
 
@@ -144,7 +132,7 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
     __weak __typeof__(self) weakSelf = self;
     [CKContextKit initWithApiKey:API_KEY
                         hashedId:hashedId
-                       automatic:monitoringState == MonitoringStateAuto
+                            mode:self.mode
                         launchOptions:nil
                     withResultToQueue:dispatch_get_main_queue()
                           withHandler:^(BOOL __unused successful,
@@ -153,7 +141,6 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
                                   NSLog(@"Failed to start TLKit: %@", error);
                                   return;
                               }
-                              weakSelf.monitoringState = monitoringState;
                               [weakSelf.tableView reloadData];
                           }];
 }
@@ -184,9 +171,9 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
         case 1: {
             BOOL enabled = NO;
             if (CKContextKit.isInitialized) {
-                enabled = indexPath.row == MonitoringStateStop;
+                enabled = indexPath.row == 0;
             } else {
-                enabled = indexPath.row != MonitoringStateStop;
+                enabled = indexPath.row != 0;
             }
             cell.textLabel.enabled = enabled;
             cell.selectionStyle = enabled ? UITableViewCellSelectionStyleDefault : UITableViewCellSelectionStyleNone;
@@ -204,7 +191,7 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
 - (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section {
     switch (section) {
         case 0: return CLLocation.formattedAuthorizationDetail;
-        case 1: return [NSString stringWithFormat:@"TLKit state: %@", self.monitoringStateString];
+        case 1: return [NSString stringWithFormat:@"TLKit state: %@", self.monitoringModeString];
         default:
             break;
     }
@@ -224,9 +211,9 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
             // avoid selecting stop if not initialized or any start if
             // initialized
             if (CKContextKit.isInitialized) {
-                if (indexPath.row != MonitoringStateStop) return nil;
+                if (indexPath.row != 0) return nil;
             } else {
-                if (indexPath.row == MonitoringStateStop) return nil;
+                if (indexPath.row == 0) return nil;
             }
             break;
         }
@@ -255,14 +242,17 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
         }
         case 1: {
             switch (indexPath.row) {
-                case MonitoringStateStop:
-                    [self stopMonitoring];
+                case 0:
+                    self.mode = CKMonitoringModeUnmonitored;
+                    [self stopTLKit];
                     break;
-                case MonitoringStateAuto:
-                    [self startMonitoring:MonitoringStateAuto];
+                case 1:
+                    self.mode = CKMonitoringModeAutomatic;
+                    [self startTLKit];
                     break;
-                case MonitoringStateManual:
-                    [self startMonitoring:MonitoringStateManual];
+                case 2:
+                    self.mode = CKMonitoringModeManual;
+                    [self startTLKit];
                     break;
                 default:
                     break;
@@ -295,7 +285,7 @@ typedef NS_ENUM(NSUInteger, MonitoringState) {
 
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
     if ([segue.destinationViewController isKindOfClass:DrivesTableViewController.class]) {
-        ((DrivesTableViewController *)segue.destinationViewController).manual = self.monitoringState == MonitoringStateManual;
+        ((DrivesTableViewController *)segue.destinationViewController).manual = self.mode == CKMonitoringModeManual;
     }
 }
 
