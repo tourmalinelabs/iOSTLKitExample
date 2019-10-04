@@ -287,7 +287,7 @@
 			files = (
 			);
 			inputPaths = (
-				"${SRCROOT}/Pods/Target Support Files/Pods-TLKitExample/Pods-TLKitExample-frameworks.sh",
+				"${PODS_ROOT}/Target Support Files/Pods-TLKitExample/Pods-TLKitExample-frameworks.sh",
 				"${BUILT_PRODUCTS_DIR}/SVProgressHUD/SVProgressHUD.framework",
 			);
 			name = "[CP] Embed Pods Frameworks";
@@ -296,7 +296,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${SRCROOT}/Pods/Target Support Files/Pods-TLKitExample/Pods-TLKitExample-frameworks.sh\"\n";
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-TLKitExample/Pods-TLKitExample-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 		7373ADC9E0550FD87F74EDFB /* [CP] Check Pods Manifest.lock */ = {

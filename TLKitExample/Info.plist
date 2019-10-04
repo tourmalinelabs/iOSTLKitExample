@@ -37,6 +37,8 @@
 	<string>TLKit needs location to monitor safe driving behavior.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>TLKit may not work correctly with this permissions.</string>
+	<key>NSMotionUsageDescription</key>
+	<string>TLKit needs to access motion data to improve drive detection accuracy.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
