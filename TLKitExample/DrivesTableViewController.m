@@ -181,10 +181,10 @@ NS_ASSUME_NONNULL_END
     [SVProgressHUD show];
     
     __weak __typeof__(self) weakSelf = self;
-    // query drives since last week with a limit of max 50 results
+    // query drives since last week with a limit of max 10 results
     [self.activityManager queryDrivesFromDate:NSDate.distantPast
                                        toDate:NSDate.distantFuture
-                                    withLimit:50
+                                    withLimit:10
                                       toQueue:dispatch_get_main_queue()
                                   withHandler:^(NSArray<__kindof CKActivity *> * _Nullable activities, NSError * _Nullable err) {
                                       [SVProgressHUD dismiss];

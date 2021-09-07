@@ -88,10 +88,10 @@
     [SVProgressHUD show];
     
     __weak __typeof__(self) weakSelf = self;
-    // query locations since last week with a limit of max 50 results
+    // query locations since last week with a limit of max 20 results
     [self.locationManager queryLocationsFromDate:NSDate.distantPast
                                           toDate:NSDate.distantFuture
-                                       withLimit:50
+                                       withLimit:20
                                          toQueue:dispatch_get_main_queue()
                                      withHandler:^(NSArray<CKLocation *> * _Nullable locations, NSError * _Nullable err) {
                                          // dismiss progress

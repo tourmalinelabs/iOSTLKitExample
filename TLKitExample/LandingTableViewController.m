@@ -272,7 +272,7 @@ static NSString *const MONITORING_MODE_KEY = @"MONITORING_MODE_KEY";
 
 - (void)openSettings {
     NSURL *url = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
-    [UIApplication.sharedApplication openURL:url];
+    [UIApplication.sharedApplication openURL:url options:@{} completionHandler:^(BOOL __unused success) {}];
 }
 
 #pragma mark - CLLocationManagerDelegate
