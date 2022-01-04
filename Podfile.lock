@@ -1,6 +1,6 @@
 PODS:
   - SVProgressHUD (2.2.1)
-  - TLKit (17.2.21090600)
+  - TLKit (17.4.21122400)
 
 DEPENDENCIES:
   - SVProgressHUD
@@ -14,7 +14,7 @@ SPEC REPOS:
 
 SPEC CHECKSUMS:
   SVProgressHUD: db27c54e6e18bc903341661fc9feb55e04905cc4
-  TLKit: 4f75d1ddf95f8abcf2b0e86e1e4f0124ab6363ad
+  TLKit: fd395fe9cbdc82b52f38c7b0305e7c7ebac26c65
 
 PODFILE CHECKSUM: 78c7fc60ce1a6fe3c436a30773eabeec2f8a3f27
 
