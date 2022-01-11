@@ -51,7 +51,7 @@ repositories, please ensure to declare `https://github.com/tourmalinelabs/iOSTLK
 Finally, save and close the `Podfile` and run `pod install` to setup your
 `CocoaPods` environment and import `TLKit` into your project. Make sure to start
 working from the `.xcworkspace` file that `CocoaPods` automatically creates, not
-the `.xcodeproj` you may have had open.
+ the `.xcodeproj` you may have had open.
 
 That's it! You can start coding!
 
@@ -63,7 +63,7 @@ configuring linking, and configuring background modes.
 
 ### Adding the TLKit framework
 A zip file containing the framework can be downloaded from
-[here](https://s3.amazonaws.com/tlsdk-ios-stage-frameworks/TLKit-12.0.18061800.zip).
+[here](https://s3.amazonaws.com/tlsdk-ios-stage-frameworks/TLKit-17.4.21122400.zip).
 Once unzipped the file can be added to an existing project by dragging the
 framework into that project, or following the
 [instructions provided Apple](https://developer.apple.com/library/ios/recipes/xcode_help-structure_navigator/articles/Adding_a_Framework.html).
@@ -82,7 +82,7 @@ dependencies
 * `libstdc++.tbd`
 * `libz.tbd`
 
-### Linking
+### Linking  
 
 For each target using `TLKit`, in the configuration under
 `Build Settings > Other Linker Flags` make sure the following flags are
@@ -112,9 +112,9 @@ use any of its features.
 
 There are two types of user information that can be used to initialize the
 engine:
-1. A SHA-256 hash of some user id. Currently only hashes of emails are allowed
-but other TL approved ids could be used.
-2. An application specific username and password.
+  1. A SHA-256 hash of some user id. Currently only hashes of emails are allowed
+  but other TL approved ids could be used.
+  2. An application specific username and password.
 
 The first type of user info is appropriate for cases where the SDK is used only
 for data collection. The second type is useful in cases where the application
@@ -140,18 +140,21 @@ Once started in this mode the engine is able to automatically detect and record
 all drives.
 
 ```objc
+NSString *hashedId = [self hashedId:@"iosexample@tourmalinelabs.com"];
+
 [CKContextKit initWithApiKey:API_KEY
-                    hashedId:[self hashedId:@"iosexample@tourmalinelabs.com"]
-                   automatic:YES // set to `NO` for manual mode
+                    hashedId:hashedId
+                        mode:CKMonitoringModeAutomatic
                launchOptions:nil
            withResultToQueue:dispatch_get_main_queue()
                  withHandler:^(BOOL successful, NSError *error) {
-                    if (error) {
-                        NSLog(@"Failed to start TLKit: %@", error);
-                        return;
-                    }
-                }];
+                     if (error) {
+                         NSLog(@"Failed to start TLKit: %@", error);
+                         return;
+                     }
+                 }];
 ```
+
 
 ## Trouble shooting
 At initialization, `CKContextKit` attempts to validate  permissions and see
@@ -173,86 +176,33 @@ those cases, the engine can be destroyed as follows:
 ```objc
 [CKContextKit destroyWithResultToQueue:dispatch_get_main_queue()
                            withHandler:^(BOOL successful, NSError *error) {
-                                if (error) {
-                                    NSLog(@"Stopping Contextkit Failed: %@",
-                                        error);
-                                    return;
-                                }
-                                NSLog(@"Stopped ContextKit!");
-                            }];
+                            if (error) {
+                                NSLog(@"Stopping ContextKit Failed: %@",
+                                    error);
+                                return;
+                            }
+                            NSLog(@"Stopped ContextKit!");
+                        }];
 ```
 
 ### Pre-authorize Location Manager access
 
 `CKContextKit` utilizes GPS as one of it's context sensor. As such it is
-best practice to request "Always" authorization from the user for
-accessing location prior to initializing the engine.
+best practice to request "Always" authorization from
+the user for accesssing location prior to initializing the engine.
 
-#### Detecting authorization changes
+_Note_: iOS 14 introduced location permissions precise vs. approximate location.
+This is necessary to have Precise Locations allowed to record drives.
 
-`CKContextKit` requires "Always" location authorization to detect drives correctly. As at any time the user may change location authorization from the Settings it can be useful to detect this changes in the app.
+### Pre-authorize Motion & Fitness access
 
-The below example demonstrates how to detect location authorization changes.
+`CKContextKit` uses Motion & Fitness data to:
+- Improve drive start and end detection.
+- Increase driving behavior event accuracy.
+- Reduce battery consumption.
 
-```objc
-#import <CoreLocation/CoreLocation.h>
-
-@interface Example: NSObject<CLLocationManagerDelegate>
-@property (strong, nonatomic) CLLocationManager *locationManager;
-@end
-```
-
-```objc
-@implementation Example
-
-- (instancetype)init {
-    self = [super init];
-    if (self) {
-        self.locationManager = [CLLocationManager new];
-        self.locationManager.delegate = self;        
-    }
-    return self;
-}
-
-- (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
-    switch (status) {
-        case kCLAuthorizationStatusNotDetermined: {
-            // User has not yet made a choice with regards to this application
-            break;
-        }
-        case kCLAuthorizationStatusDenied:{
-            // User has explicitly denied authorization for this application, or
-            // location services are disabled in Settings.
-            break;
-        }
-        case kCLAuthorizationStatusAuthorizedAlways:{
-            // User has granted authorization to use their location at any time,
-            // including monitoring for regions, visits, or significant location changes.
-            break;
-        }
-        case kCLAuthorizationStatusAuthorizedWhenInUse:{
-            // User has granted authorization to use their location only when your app
-            // is visible to them (it will be made visible to them if you continue to
-            // receive location updates while in the background).  Authorization to use
-            // launch APIs has not been granted.
-            break;
-        }
-        break;
-    }
-}
-
-@end
-```
-
-#### Requesting "Always" location authorization
-
-The code below demonstrates how to request "Always" locations authorization.
-
-```objc
-if (CLLocationManager.authorizationStatus == kCLAuthorizationStatusNotDetermined) {
-    [self.locationManager requestAlwaysAuthorization];
-}
-```
+Although this is not mandatory this is highly recommended to request
+Motion & Fitness authorization prior to initializing the engine.
 
 ## Drive Monitoring
 
@@ -269,7 +219,7 @@ If the engine was initialized into manual mode, drives can be started and
 stopped as follows.
 
 ```objc
-NSUUID* driveId = [self.activityManager startManualTrip];
+NSUUID *driveId = [self.activityManager startManualTrip];
 ```
 
 ```objc
@@ -323,15 +273,15 @@ Once started all drives will be recorded for querying either by date:
                        withLimit:100
                          toQueue:dispatch_get_main_queue()
                      withHandler:^(NSArray *drives, NSError *error) {
-                        if (!error) {
-                            NSLog(@"Got drives: %@", drives);
-                        }
-                    }];
-```
+                         if (!error) {
+                             NSLog(@"Got drives: %@", drives);
+                         }
+                     }];
+```    
 
 or by id:
 
-```objc
+```objc    
 NSUUID *driveId = ...;
 [self.actMgr queryDriveById:driveId
                     toQueue:dispatch_get_main_queue()
@@ -340,7 +290,7 @@ NSUUID *driveId = ...;
                         NSLog(@"Found drive %@", drives[0]);
                     }
                 }];
-```
+```   
 
 ## Telematics monitoring
 
@@ -354,7 +304,8 @@ The application can register to receive telematics events as follows.
 ```objc
 [self.actMgr
     listenForTelematicsEventsToQueue:dispatch_get_main_queue()
-                         withHandler:^(CKTelematicsEvent *evt, NSError *error) {
+                         withHandler:^(CKTelematicsEvent *evt,
+                            NSError *error) {
                             if (error) {
                                 NSLog(@"Telematics event failed with error %@",
                                     error);
@@ -374,32 +325,27 @@ Telematics events can be stopped as follows
 [self.actMgr stopListeningForTelematicsEvents];
 ```
 
-### Querying previous telematics events
+### Querying telematics events for a specific drive
 
-Query previous telematics events as follows.
+Query telematics events for a specific drive as follows.
 
 ```objc
 #import <TLKit/CKContextKit.h>
 ...
+NSUUID *driveId = ...;
 [self.actMgr
-    queryTelematicsEventsFromDate:[NSDate distantPast]
-                           toDate:[NSDate distantFuture]
-                             page:1
-                   resultsPerPage:50
-                          toQueue:dispatch_get_main_queue()
-                      withHandler:^(NSUInteger currentPage,
-                        NSUInteger pageCount,
-                        NSUInteger resultCount,
-                        NSArray *results,
-                        NSError *error) {
-                            if (error) {
-                                NSLog(@"Telematics query failed with error %@",
-                                    error);
-                            } else {
-                                NSLog(@"Got telematics events: %@",
-                                    results);
-                            }
-                        }];
+    queryTelematicsEventsForTrip:driveId
+                         toQueue:dispatch_get_main_queue()
+                     withHandler:^(NSArray *results, NSError *error) {
+                         if (error) {
+                             NSLog(@"Telematics query failed with error %@",
+                                 error);
+                         } else {
+                             NSLog(@"Got telematics events: %@",
+                                 results);
+                         }
+                     }];
+
 ```
 
 ## Low power location monitoring
@@ -424,8 +370,7 @@ A listener must be registered to begin receiving location updates as follows:
 ```objc
 [locMgr startUpdatingLocationsToQueue:dispatch_get_main_queue()
                           withHandler:^(CKLocation *location) {
-                              NSLog(@"New location update %@",
-                                  [location description]);
+                              NSLog(@"New location update %@", [location description]);
                           }
                            completion:^(BOOL successful, NSError* error) {
                                if (successful) {
@@ -438,7 +383,7 @@ A listener can be unregistered as follows:
 
 ```objc
 [locMgr stopUpdatingLocation];
-```
+```    
 
 
 ### Querying location history
@@ -446,7 +391,7 @@ A listener can be unregistered as follows:
 `CKLocationManager` provides the ability to query past locations via
 `queryLocations` method. The query locations method can be used as follows:
 
-```objc
+```objc    
 [locMgr queryLocationsFromDate:[NSDate distantPast]
                         toDate:[NSDate distantFuture]
                      withLimit:30
