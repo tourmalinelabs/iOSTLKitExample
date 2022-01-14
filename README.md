@@ -407,6 +407,15 @@ was registered as stated in the previous section.
 
 # Trouble Shooting
 
+## Crash Reporting
+
+As crashes may happen and disturb the activity recording, it is important to monitor the app health by using a crash reporter. To give integrators the choice of tools as well as to avoid dependency conflicts, TLKit does not embed any crash reporting tool into the sdk. We highly recommend that integrators install a third-party crash reporting library such as Firebase Crashlytics, Sentry, etc.
+
+At Tourmaline Labs we are using Firebase Crashlytics in our own apps:
+https://firebase.google.com/docs/crashlytics/get-started
+
+_Note:_ TLKit is built with bitcode enabled then your app will contain the symbols at compilation time.
+
 ## Out of date TLKit Cocoapod
 Errors like
 ```
