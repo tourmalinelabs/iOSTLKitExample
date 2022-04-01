@@ -63,7 +63,7 @@ configuring linking, and configuring background modes.
 
 ### Adding the TLKit framework
 A zip file containing the framework can be downloaded from
-[here](https://s3.amazonaws.com/tlsdk-ios-stage-frameworks/TLKit-17.4.21122400.zip).
+[here](https://s3.amazonaws.com/tlsdk-ios-stage-frameworks/TLKit-17.4.22032800.zip).
 Once unzipped the file can be added to an existing project by dragging the
 framework into that project, or following the
 [instructions provided Apple](https://developer.apple.com/library/ios/recipes/xcode_help-structure_navigator/articles/Adding_a_Framework.html).
