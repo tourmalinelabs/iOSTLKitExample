@@ -1,5 +1,5 @@
-/*******************************************************************************
- * Copyright 2016 Tourmaline Labs, Inc. All rights reserved.
+/* *****************************************************************************
+ * Copyright 2023 Tourmaline Labs, Inc. All rights reserved.
  * Confidential & Proprietary - Tourmaline Labs, Inc. ("TLI")
  *
  * The party receiving this software directly from TLI (the "Recipient")
@@ -17,13 +17,13 @@
  * different portions of the software. This notice does not supersede the
  * application of any third party copyright notice to that third party's
  * code.
- ******************************************************************************/
+ * ****************************************************************************/
 
-#import "CKDrive+Format.h"
+#import "TLTrip+Format.h"
 #import "NSDate+Format.h"
 #import "CLLocation+Format.h"
 
-@implementation CKDrive (Format)
+@implementation TLTrip (Format)
 
 - (NSString *)formattedID {
     return [NSString stringWithFormat:@"ID: %@",
@@ -63,13 +63,13 @@
 - (NSString *)formattedStartLocation {
     CLLocation *location = self.locations.firstObject;
     return [NSString stringWithFormat:@"Start location: %@",
-            location ? location.formattedLatLon : @"-"];
+            location ? location.formattedLatLng : @"-"];
 }
 
 - (NSString *)formattedEndLocation {
     CLLocation *location = self.locations.lastObject;
     return [NSString stringWithFormat:@"End location: %@",
-            location ? location.formattedLatLon : @"-"];
+            location ? location.formattedLatLng : @"-"];
 }
 
 - (NSString *)formattedStartAddress {

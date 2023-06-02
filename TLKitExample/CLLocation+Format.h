@@ -1,5 +1,5 @@
-/*******************************************************************************
- * Copyright 2016 Tourmaline Labs, Inc. All rights reserved.
+/* *****************************************************************************
+ * Copyright 2023 Tourmaline Labs, Inc. All rights reserved.
  * Confidential & Proprietary - Tourmaline Labs, Inc. ("TLI")
  *
  * The party receiving this software directly from TLI (the "Recipient")
@@ -17,16 +17,14 @@
  * different portions of the software. This notice does not supersede the
  * application of any third party copyright notice to that third party's
  * code.
- ******************************************************************************/
+ * ****************************************************************************/
 
-#import <CoreLocation/CoreLocation.h>
+@import CoreLocation;
 
 NS_ASSUME_NONNULL_BEGIN
 
 @interface CLLocation (Format)
-- (NSString *)formattedLatLon;
-+ (NSString *)formattedAuthorization;
-+ (NSString *)formattedAuthorizationDetail;
+- (NSString *)formattedLatLng;
 @end
 
 NS_ASSUME_NONNULL_END

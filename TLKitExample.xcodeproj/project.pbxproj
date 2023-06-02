@@ -10,7 +10,7 @@
 		6977875F1C288B0500CB13AF /* SystemConfiguration.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6977875E1C288B0500CB13AF /* SystemConfiguration.framework */; };
 		697787611C288B1B00CB13AF /* CoreMotion.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 697787601C288B1B00CB13AF /* CoreMotion.framework */; };
 		69F276901C29CAF8009A7126 /* LandingTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 69F2768F1C29CAF8009A7126 /* LandingTableViewController.m */; };
-		69F276971C29D791009A7126 /* DrivesTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 69F276961C29D791009A7126 /* DrivesTableViewController.m */; };
+		69F276971C29D791009A7126 /* TripsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 69F276961C29D791009A7126 /* TripsTableViewController.m */; };
 		69F276A31C29DC38009A7126 /* LocationsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 69F276A21C29DC38009A7126 /* LocationsTableViewController.m */; };
 		69F4FBFB1C28827300FB6DA7 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 69F4FBFA1C28827300FB6DA7 /* main.m */; };
 		69F4FBFE1C28827300FB6DA7 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 69F4FBFD1C28827300FB6DA7 /* AppDelegate.m */; };
@@ -19,11 +19,13 @@
 		CB2A2E541E7BE46400E5D9AC /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = CB2A2E531E7BE46400E5D9AC /* Images.xcassets */; };
 		CB6073E01FD7FACD00B88242 /* TelematicsTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = CB6073DF1FD7FACD00B88242 /* TelematicsTableViewController.m */; };
 		CB6073E31FD802C900B88242 /* TelematicsCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CB6073E21FD802C900B88242 /* TelematicsCell.m */; };
-		CB6073E61FD8253E00B88242 /* CKTelematicsEvent+Format.m in Sources */ = {isa = PBXBuildFile; fileRef = CB6073E51FD8253E00B88242 /* CKTelematicsEvent+Format.m */; };
-		CBEA100D1EB1F97800DAC826 /* DriveCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CBEA100C1EB1F97800DAC826 /* DriveCell.m */; };
+		CB6073E61FD8253E00B88242 /* TLTelematicsEvent+Format.m in Sources */ = {isa = PBXBuildFile; fileRef = CB6073E51FD8253E00B88242 /* TLTelematicsEvent+Format.m */; };
+		CBBFD3E52A27833800E74445 /* CLLocationManager+TLKit.m in Sources */ = {isa = PBXBuildFile; fileRef = CBBFD3E42A27833800E74445 /* CLLocationManager+TLKit.m */; };
+		CBBFD3E82A27841A00E74445 /* CMMotionActivityManager+TLKit.m in Sources */ = {isa = PBXBuildFile; fileRef = CBBFD3E72A27841A00E74445 /* CMMotionActivityManager+TLKit.m */; };
+		CBEA100D1EB1F97800DAC826 /* TripCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CBEA100C1EB1F97800DAC826 /* TripCell.m */; };
 		CBEA10111EB211B900DAC826 /* NSDate+Format.m in Sources */ = {isa = PBXBuildFile; fileRef = CBEA10101EB211B900DAC826 /* NSDate+Format.m */; };
-		CBEA10171EB2153F00DAC826 /* CKDrive+Format.m in Sources */ = {isa = PBXBuildFile; fileRef = CBEA10161EB2153F00DAC826 /* CKDrive+Format.m */; };
-		CBEA101A1EB218C100DAC826 /* CKLocation+Format.m in Sources */ = {isa = PBXBuildFile; fileRef = CBEA10191EB218C100DAC826 /* CKLocation+Format.m */; };
+		CBEA10171EB2153F00DAC826 /* TLTrip+Format.m in Sources */ = {isa = PBXBuildFile; fileRef = CBEA10161EB2153F00DAC826 /* TLTrip+Format.m */; };
+		CBEA101A1EB218C100DAC826 /* TLLocation+Format.m in Sources */ = {isa = PBXBuildFile; fileRef = CBEA10191EB218C100DAC826 /* TLLocation+Format.m */; };
 		CBEA101D1EB21BB500DAC826 /* CLLocation+Format.m in Sources */ = {isa = PBXBuildFile; fileRef = CBEA101C1EB21BB500DAC826 /* CLLocation+Format.m */; };
 		CBEA10201EB21FDE00DAC826 /* LocationCell.m in Sources */ = {isa = PBXBuildFile; fileRef = CBEA101F1EB21FDE00DAC826 /* LocationCell.m */; };
 		F2CE80A6706659047612E5DC /* Pods_TLKitExample.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FBA99DD464C6232FA0E41124 /* Pods_TLKitExample.framework */; };
@@ -35,8 +37,8 @@
 		697787601C288B1B00CB13AF /* CoreMotion.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreMotion.framework; path = System/Library/Frameworks/CoreMotion.framework; sourceTree = SDKROOT; };
 		69F2768E1C29CAF8009A7126 /* LandingTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LandingTableViewController.h; sourceTree = "<group>"; };
 		69F2768F1C29CAF8009A7126 /* LandingTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LandingTableViewController.m; sourceTree = "<group>"; };
-		69F276951C29D791009A7126 /* DrivesTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DrivesTableViewController.h; sourceTree = "<group>"; };
-		69F276961C29D791009A7126 /* DrivesTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DrivesTableViewController.m; sourceTree = "<group>"; };
+		69F276951C29D791009A7126 /* TripsTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TripsTableViewController.h; sourceTree = "<group>"; };
+		69F276961C29D791009A7126 /* TripsTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TripsTableViewController.m; sourceTree = "<group>"; };
 		69F276A11C29DC38009A7126 /* LocationsTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocationsTableViewController.h; sourceTree = "<group>"; };
 		69F276A21C29DC38009A7126 /* LocationsTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = LocationsTableViewController.m; sourceTree = "<group>"; };
 		69F4FBF61C28827300FB6DA7 /* TLKitExample.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TLKitExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -52,16 +54,20 @@
 		CB6073DF1FD7FACD00B88242 /* TelematicsTableViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TelematicsTableViewController.m; sourceTree = "<group>"; };
 		CB6073E11FD802C900B88242 /* TelematicsCell.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = TelematicsCell.h; sourceTree = "<group>"; };
 		CB6073E21FD802C900B88242 /* TelematicsCell.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = TelematicsCell.m; sourceTree = "<group>"; };
-		CB6073E41FD8253E00B88242 /* CKTelematicsEvent+Format.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CKTelematicsEvent+Format.h"; sourceTree = "<group>"; };
-		CB6073E51FD8253E00B88242 /* CKTelematicsEvent+Format.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "CKTelematicsEvent+Format.m"; sourceTree = "<group>"; };
-		CBEA100B1EB1F97800DAC826 /* DriveCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DriveCell.h; sourceTree = "<group>"; };
-		CBEA100C1EB1F97800DAC826 /* DriveCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DriveCell.m; sourceTree = "<group>"; };
+		CB6073E41FD8253E00B88242 /* TLTelematicsEvent+Format.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TLTelematicsEvent+Format.h"; sourceTree = "<group>"; };
+		CB6073E51FD8253E00B88242 /* TLTelematicsEvent+Format.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "TLTelematicsEvent+Format.m"; sourceTree = "<group>"; };
+		CBBFD3E32A27833800E74445 /* CLLocationManager+TLKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CLLocationManager+TLKit.h"; sourceTree = "<group>"; };
+		CBBFD3E42A27833800E74445 /* CLLocationManager+TLKit.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "CLLocationManager+TLKit.m"; sourceTree = "<group>"; };
+		CBBFD3E62A27841A00E74445 /* CMMotionActivityManager+TLKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CMMotionActivityManager+TLKit.h"; sourceTree = "<group>"; };
+		CBBFD3E72A27841A00E74445 /* CMMotionActivityManager+TLKit.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "CMMotionActivityManager+TLKit.m"; sourceTree = "<group>"; };
+		CBEA100B1EB1F97800DAC826 /* TripCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TripCell.h; sourceTree = "<group>"; };
+		CBEA100C1EB1F97800DAC826 /* TripCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TripCell.m; sourceTree = "<group>"; };
 		CBEA100F1EB211B900DAC826 /* NSDate+Format.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSDate+Format.h"; sourceTree = "<group>"; };
 		CBEA10101EB211B900DAC826 /* NSDate+Format.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSDate+Format.m"; sourceTree = "<group>"; };
-		CBEA10151EB2153F00DAC826 /* CKDrive+Format.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CKDrive+Format.h"; sourceTree = "<group>"; };
-		CBEA10161EB2153F00DAC826 /* CKDrive+Format.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CKDrive+Format.m"; sourceTree = "<group>"; };
-		CBEA10181EB218C100DAC826 /* CKLocation+Format.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CKLocation+Format.h"; sourceTree = "<group>"; };
-		CBEA10191EB218C100DAC826 /* CKLocation+Format.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CKLocation+Format.m"; sourceTree = "<group>"; };
+		CBEA10151EB2153F00DAC826 /* TLTrip+Format.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TLTrip+Format.h"; sourceTree = "<group>"; };
+		CBEA10161EB2153F00DAC826 /* TLTrip+Format.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "TLTrip+Format.m"; sourceTree = "<group>"; };
+		CBEA10181EB218C100DAC826 /* TLLocation+Format.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TLLocation+Format.h"; sourceTree = "<group>"; };
+		CBEA10191EB218C100DAC826 /* TLLocation+Format.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "TLLocation+Format.m"; sourceTree = "<group>"; };
 		CBEA101B1EB21BB500DAC826 /* CLLocation+Format.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "CLLocation+Format.h"; sourceTree = "<group>"; };
 		CBEA101C1EB21BB500DAC826 /* CLLocation+Format.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "CLLocation+Format.m"; sourceTree = "<group>"; };
 		CBEA101E1EB21FDE00DAC826 /* LocationCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = LocationCell.h; sourceTree = "<group>"; };
@@ -115,10 +121,10 @@
 		69F2769A1C29D816009A7126 /* Drive Monitoring */ = {
 			isa = PBXGroup;
 			children = (
-				69F276951C29D791009A7126 /* DrivesTableViewController.h */,
-				69F276961C29D791009A7126 /* DrivesTableViewController.m */,
-				CBEA100B1EB1F97800DAC826 /* DriveCell.h */,
-				CBEA100C1EB1F97800DAC826 /* DriveCell.m */,
+				69F276951C29D791009A7126 /* TripsTableViewController.h */,
+				69F276961C29D791009A7126 /* TripsTableViewController.m */,
+				CBEA100B1EB1F97800DAC826 /* TripCell.h */,
+				CBEA100C1EB1F97800DAC826 /* TripCell.m */,
 			);
 			name = "Drive Monitoring";
 			sourceTree = "<group>";
@@ -194,14 +200,18 @@
 			children = (
 				CBEA100F1EB211B900DAC826 /* NSDate+Format.h */,
 				CBEA10101EB211B900DAC826 /* NSDate+Format.m */,
-				CBEA10151EB2153F00DAC826 /* CKDrive+Format.h */,
-				CBEA10161EB2153F00DAC826 /* CKDrive+Format.m */,
-				CBEA10181EB218C100DAC826 /* CKLocation+Format.h */,
-				CBEA10191EB218C100DAC826 /* CKLocation+Format.m */,
+				CBEA10151EB2153F00DAC826 /* TLTrip+Format.h */,
+				CBEA10161EB2153F00DAC826 /* TLTrip+Format.m */,
+				CBEA10181EB218C100DAC826 /* TLLocation+Format.h */,
+				CBEA10191EB218C100DAC826 /* TLLocation+Format.m */,
 				CBEA101B1EB21BB500DAC826 /* CLLocation+Format.h */,
 				CBEA101C1EB21BB500DAC826 /* CLLocation+Format.m */,
-				CB6073E41FD8253E00B88242 /* CKTelematicsEvent+Format.h */,
-				CB6073E51FD8253E00B88242 /* CKTelematicsEvent+Format.m */,
+				CB6073E41FD8253E00B88242 /* TLTelematicsEvent+Format.h */,
+				CB6073E51FD8253E00B88242 /* TLTelematicsEvent+Format.m */,
+				CBBFD3E32A27833800E74445 /* CLLocationManager+TLKit.h */,
+				CBBFD3E42A27833800E74445 /* CLLocationManager+TLKit.m */,
+				CBBFD3E62A27841A00E74445 /* CMMotionActivityManager+TLKit.h */,
+				CBBFD3E72A27841A00E74445 /* CMMotionActivityManager+TLKit.m */,
 			);
 			name = Helpers;
 			sourceTree = "<group>";
@@ -324,18 +334,20 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				CBEA100D1EB1F97800DAC826 /* DriveCell.m in Sources */,
+				CBEA100D1EB1F97800DAC826 /* TripCell.m in Sources */,
 				69F4FBFE1C28827300FB6DA7 /* AppDelegate.m in Sources */,
 				69F4FBFB1C28827300FB6DA7 /* main.m in Sources */,
-				69F276971C29D791009A7126 /* DrivesTableViewController.m in Sources */,
-				CB6073E61FD8253E00B88242 /* CKTelematicsEvent+Format.m in Sources */,
+				69F276971C29D791009A7126 /* TripsTableViewController.m in Sources */,
+				CB6073E61FD8253E00B88242 /* TLTelematicsEvent+Format.m in Sources */,
 				CB6073E01FD7FACD00B88242 /* TelematicsTableViewController.m in Sources */,
 				CBEA101D1EB21BB500DAC826 /* CLLocation+Format.m in Sources */,
 				CBEA10201EB21FDE00DAC826 /* LocationCell.m in Sources */,
+				CBBFD3E52A27833800E74445 /* CLLocationManager+TLKit.m in Sources */,
 				CBEA10111EB211B900DAC826 /* NSDate+Format.m in Sources */,
 				69F276901C29CAF8009A7126 /* LandingTableViewController.m in Sources */,
-				CBEA101A1EB218C100DAC826 /* CKLocation+Format.m in Sources */,
-				CBEA10171EB2153F00DAC826 /* CKDrive+Format.m in Sources */,
+				CBBFD3E82A27841A00E74445 /* CMMotionActivityManager+TLKit.m in Sources */,
+				CBEA101A1EB218C100DAC826 /* TLLocation+Format.m in Sources */,
+				CBEA10171EB2153F00DAC826 /* TLTrip+Format.m in Sources */,
 				69F276A31C29DC38009A7126 /* LocationsTableViewController.m in Sources */,
 				CB6073E31FD802C900B88242 /* TelematicsCell.m in Sources */,
 			);
@@ -477,6 +489,7 @@
 					"$(PROJECT_DIR)",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/TLKitExample/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.tourmalinelabs.TLKitExample;
 				PRODUCT_NAME = TLKitExample;
@@ -498,6 +511,7 @@
 					"$(PROJECT_DIR)",
 				);
 				INFOPLIST_FILE = "$(SRCROOT)/TLKitExample/Info.plist";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.tourmalinelabs.TLKitExample;
 				PRODUCT_NAME = TLKitExample;

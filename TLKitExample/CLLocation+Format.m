@@ -1,5 +1,5 @@
-/*******************************************************************************
- * Copyright 2016 Tourmaline Labs, Inc. All rights reserved.
+/* *****************************************************************************
+ * Copyright 2023 Tourmaline Labs, Inc. All rights reserved.
  * Confidential & Proprietary - Tourmaline Labs, Inc. ("TLI")
  *
  * The party receiving this software directly from TLI (the "Recipient")
@@ -17,46 +17,16 @@
  * different portions of the software. This notice does not supersede the
  * application of any third party copyright notice to that third party's
  * code.
- ******************************************************************************/
+ * ****************************************************************************/
 
 #import "CLLocation+Format.h"
 
 @implementation CLLocation (Format)
 
-- (NSString *)formattedLatLon {
+- (NSString *)formattedLatLng {
     return [NSString stringWithFormat:@"%f, %f",
             self.coordinate.latitude,
             self.coordinate.longitude];
-}
-
-+ (NSString *)formattedAuthorization {
-    switch (CLLocationManager.authorizationStatus) {
-        case kCLAuthorizationStatusNotDetermined:
-            return @"Request authorization";
-        case kCLAuthorizationStatusAuthorizedAlways:
-            return @"Authorized 'Always'";
-        case kCLAuthorizationStatusAuthorizedWhenInUse:
-            return @"Authorized 'Only When In Use'";
-        case kCLAuthorizationStatusDenied:
-            return @"Authorized 'Never'";
-        default:
-            break;
-    }
-    return @"?";
-}
-
-+ (NSString *)formattedAuthorizationDetail {
-    switch (CLLocationManager.authorizationStatus) {
-        case kCLAuthorizationStatusNotDetermined:
-            return @"TLKit needs location to monitor safe driving behavior.";
-        case kCLAuthorizationStatusAuthorizedAlways:
-            return nil;
-        default:
-            break;
-    }
-    return @"TLKit may not work correctly with this permissions."
-    " Please go to 'Settings/Privacy/Location Services/TLKitExample'"
-    " and allow 'Always' location access";
 }
 
 @end

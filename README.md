@@ -1,9 +1,7 @@
 # Getting started with TLKit for iOS
 
 This document contains a quick start guide for integrating `TLKit`
-into your iOS application. More detailed documentation of the APIs can
-be found in the `docs` folder. The API documents can be opened by
-opening the file `docs/index.html` in your web browser.
+into your iOS application.
 
 # Sample Project
 
@@ -37,7 +35,7 @@ Open and edit the `Podfile` as follow:
 source 'https://github.com/tourmalinelabs/iOSTLKitSDK.git'
 source 'https://github.com/CocoaPods/Specs.git'
 
-platform :ios, '9.0'
+platform :ios, '11.0'
 
 use_frameworks!
 
@@ -57,7 +55,7 @@ That's it! You can start coding!
 
 ## Option 2: Manual installation
 
-While Cocoapods are the recommended method for Adding TLKit to a project it can
+While Cocoapods are the recommended method for Adding `TLKit` to a project it can
 also be adde. This also requires manually adding it's dependent frameworks,
 configuring linking, and configuring background modes.
 
@@ -104,198 +102,248 @@ Under `Capabilities > Background Modes` check the box next to
 
 # Using TLKit
 
-The heart of the TLKit is the Context Engine. The engine needs to
-be initialized with some user information and a drive detection mode in order to
-use any of its features.
+`TLKit` needs to be initialized with some information and a trip detection mode 
+in order to use any of its features. 
 
-## User information
+## Initialization
 
-There are two types of user information that can be used to initialize the
-engine:
+Because of `TLKit` integration, your app will be able to automatically restart in background in different circumstances: significant location changes, geofence event, device reboot, app update, crash... 
+When the app starts the AppDelegate's 
+
+```objc
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(nullable NSDictionary<UIApplicationLaunchOptionsKey, id> *)launchOptions
+```
+
+method is called. It is the integrator responsability to know if `TLKit` was previously running.
+If that was the case you must call `[TLKit initWithApiKey:...]` to reauthenticate the user.
+This is very important to initialize `TLKit` as quickly as possible to ensure that the keep alive mechanism is effectively set before iOS decides to kill or suspend the app. 
+You must not defer the initialization because you need a network reponse or you wait another thread to dispatch some information.
+
+For being able to do that you will probably have to store locally all the starting parameters you need like:
+- the API key
+- the cloud area (US or EU)
+- the user credentials (username and password or hashed id)
+- the monitoring mode (Automatic, Manual or Unmonitored)
+- the user information (first name, last name, external id, group identifiers to join in case you use the `TLLaunchOptions`...)
+
+### API key
+
+You have to provide an API key associated to your company's account.
+
+### Area
+
+You have to specify the `TLCloudArea`, the default one should always be the US area `TLCloudAreaUS`. If you have been told to do so use the european area `TLCloudAreaEU` instead.
+
+### User credentials
+
+There are two types of user creadentials that can be used to initialize `TLKit`:
   1. A SHA-256 hash of some user id. Currently only hashes of emails are allowed
   but other TL approved ids could be used.
   2. An application specific username and password.
 
-The first type of user info is appropriate for cases where the SDK is used only
-for data collection. The second type is useful in cases where the application
-wants to access the per user information and provide password protected access
-to it to it's users.
+The first type is appropriate for cases where the SDK is used only for data collection. The second type is useful in cases where the application wants to access the per user data and provide password protected access to it to it's users.
 
-## Automatic and manual modes
+### User information (TLLaunchOptions)
 
-The engine can be initialized for either automatic drive detection where the SDK
-will automatically detect and monitor drives or a manual drive detection where
-the SDK will only monitor drives when explicitly told to by the application.
+Additional information can be passed when initializing `TLKit` such as:
+- first name, 
+- last name, 
+- external identifier, 
+- group identifiers to join 
+
+For that we use the `TLLaunchOptions` object like below:
+
+First we capture the launch options dictionary from the `AppDelegate` for passing it later to `TLKit`. This dictionary contains information such as app launch reason (location changes, user launch, remote notification...).
+
+```objc
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(nullable NSDictionary<UIApplicationLaunchOptionsKey, id> *)launchOptions {
+    
+    self.appLaunchOptions = launchOptions;
+    
+    // call TLKit initialization if needed ...
+}
+```
+
+Before `TLKit` initialization, create a dictionary containing the `TLLaunchOptions` and the app's launch options dictionary using respectively `TLLaunchOptionsKey` and `TLAppDelegateLaunchOptionsKey` keys:
+
+```objc
+// TLLaunchOptions 
+TLLaunchOptions *tlLaunchOptions = TLLaunchOptions.new;
+tlLaunchOptions.firstname = @"Bob";
+tlLaunchOptions.lastname = @"Smith";
+tlLaunchOptions.externalId = @"my-company-identifier-xyz";
+[tlLaunchOptions addGroupExternalIds:@[@"team_blue", @"team_green"] 
+                             toOrgId:123];
+
+NSMutableDictionary *launchOptions = NSMutableDictionary.dictionary;
+launchOptions[TLLaunchOptionsKey] = tlLaunchOptions;
+if (self.appLaunchOptions != nil) { 
+    launchOptions[TLAppDelegateLaunchOptionsKey] = self.appLaunchOptions;
+}
+
+// then pass launctOptions to `TLKit`...
+```
+
+### Automatic and manual modes
+
+`TLKit` can be initialized for either automatic trip detection where the SDK
+will automatically detect and monitor trips or a manual trip detection where
+the SDK will only monitor trips when explicitly told to by the application.
 
 The first mode is useful in cases where the user is not interacting with the
-application to start and end drives. While the second mode is useful when the
-user will explicitly start and end drives in the application.
+application to start and end trips. While the second mode is useful when the
+user will explicitly start and end trips in the application.
 
 ## Example initialization with SHA-256 hash in automatic mode
 
-The below examples demonstrate initialization with just a SHA-256 hash. The
-example application provides code for generating this hash.
+The below example demonstrates initialization with just a SHA-256 hash using `TLDigest` helper.
 
-Once started in this mode the engine is able to automatically detect and record
-all drives.
+Once started in this mode `TLKit` is able to automatically detect and record
+all trips.
 
 ```objc
-NSString *hashedId = [self hashedId:@"iosexample@tourmalinelabs.com"];
+NSString *hashedId = [TLDigest sha256:@"iosexample@tourmalinelabs.com"];
 
-[CKContextKit initWithApiKey:API_KEY
-                    hashedId:hashedId
-                        mode:CKMonitoringModeAutomatic
-               launchOptions:nil
-           withResultToQueue:dispatch_get_main_queue()
-                 withHandler:^(BOOL successful, NSError *error) {
-                     if (error) {
-                         NSLog(@"Failed to start TLKit: %@", error);
-                         return;
-                     }
-                 }];
+[TLKit initWithApiKey:API_KEY
+                 area:TLCloudAreaUS
+             hashedId:hashedId
+          authHandler:^(TLAuthenticationStatus status, NSError *_Nullable error) {
+            ...
+          }
+                 mode:TLMonitoringModeAutomatic
+        launchOptions:launchOptions
+    withResultToQueue:dispatch_get_main_queue()
+          withHandler:^(BOOL successful, NSError *error) {
+            if (error) {
+                NSLog(@"Failed to start TLKit: %@", error);
+                return;
+            }
+        }];
 ```
 
+## Destroying TLKit.
 
-## Trouble shooting
-At initialization, `CKContextKit` attempts to validate  permissions and see
-other necessary conditions are met when initializing the engine. If any of these
-conditions are not met it will fail with an `error` that can be used to debug
-the issue.
-
-One example of where a failure would occur would be location permissions
-not being enabled for the application.
-
-### Destroying an engine.
-
-Once initialized there is no reason to destroy the engine unless you need to
-set a new `CKAuthenticationManagerDelegate` for a different user or password. Or In
-those cases, the engine can be destroyed as follows:
-
-`CKContextKit` can be destroyed as follows
+Once initialized there is no reason to destroy `TLKit` unless you need to
+authenticate a different user. Or in those cases, `TLKit` can be destroyed as follows:
 
 ```objc
-[CKContextKit destroyWithResultToQueue:dispatch_get_main_queue()
-                           withHandler:^(BOOL successful, NSError *error) {
+[TLKit destroyWithResultToQueue:dispatch_get_main_queue()
+                        withHandler:^(BOOL successful, NSError * _Nullable error) {
                             if (error) {
-                                NSLog(@"Stopping ContextKit Failed: %@",
-                                    error);
+                                NSLog(@"Stopping TLKit Failed: %@", error);
                                 return;
                             }
-                            NSLog(@"Stopped ContextKit!");
+                            NSLog(@"Stopped TLKit!");
                         }];
 ```
 
 ### Pre-authorize Location Manager access
 
-`CKContextKit` utilizes GPS as one of it's context sensor. As such it is
+`TLKit` utilizes GPS as one of it's context sensor. As such it is
 best practice to request "Always" authorization from
-the user for accesssing location prior to initializing the engine.
+the user for accesssing location prior to initializing `TLKit`.
 
 _Note_: iOS 14 introduced location permissions precise vs. approximate location.
-This is necessary to have Precise Locations allowed to record drives.
+This is necessary to have Precise Locations allowed to record trips.
 
 ### Pre-authorize Motion & Fitness access
 
-`CKContextKit` uses Motion & Fitness data to:
-- Improve drive start and end detection.
+`TLKit` uses Motion & Fitness data to:
+- Improve trip start and end detection.
 - Increase driving behavior event accuracy.
 - Reduce battery consumption.
 
 Although this is not mandatory this is highly recommended to request
-Motion & Fitness authorization prior to initializing the engine.
+Motion & Fitness authorization prior to initializing `TLKit`.
 
-## Drive Monitoring
+## Trip Monitoring
 
-Drive monitoring functionality is accessed through the
-`CKActivityManager`
+Trip monitoring functionality is accessed through the `TLActivityManager`
 
 ```objc
-self.actMgr = [CKActivityManager new];
+self.actMgr = [TLActivityManager new];
 ```
 
-### Starting and stopping manual drives
+### Starting and stopping manual trips
 
-If the engine was initialized into manual mode, drives can be started and
+If `TLKit` was initialized into manual mode, trips can be started and
 stopped as follows.
 
 ```objc
-NSUUID *driveId = [self.activityManager startManualTrip];
+NSUUID *tripId = [self.activityManager startManualTrip];
 ```
 
 ```objc
-[self.actMgr stopManualTrip: driveId];
+[self.actMgr stopManualTrip:tripId];
 ```
 
-Multiple overlapping manual drives can be started at the same time.
+Multiple overlapping manual trips can be started at the same time.
 
+### Registering a trip event listener
 
-### Registering a drive event listener
-
-The application can register to receive drive start, update and events as
+The application can register to receive trip start, update and events as
 follows.
 
-Register a listener with the drive monitoring service as follows.
+Register a listener with the trip monitoring service as follows.
 
 ```objc
-[self.actMgr
-    listenForDriveEventsToQueue:dispatch_get_main_queue()
-                    withHandler:^(CKActivityEvent *evt, NSError *error) {
-                        // handle error
-                        if (error) {
-                            NSLog(@"Failed to register lstnr: %@", error);
-                            return;
-                        }
-
-                        NSLog(@"New CKActivityEvent: %@", evt);
-                    }];
+[self.actMgr listenForTripEventsToQueue:dispatch_get_main_queue()
+                            withHandler:^(TLActivityEvent *evt, NSError *error) {
+                                // handle error
+                                if (error) {
+                                    NSLog(@"Failed to register lstnr: %@", error);
+                                    return;
+                                }
+                                NSLog(@"New TLActivityEvent: %@", evt);
+                            }];
 ```
 
-_Note_: multiple drive events may be received for the same drive as the drive
-progresses and the drive processing updates the drive with more accurate map
+_Note_: multiple trip events may be received for the same trip as the trip
+progresses and the trip processing updates the trip with more accurate map
 points.
 
-Drive events can be stopped as follows
+Trip events can be stopped as follows
 
 ```objc
-[self.actMgr stopListeningForDriveEvents];
+[self.actMgr stopListeningForTripEvents];
 ```
 
-### Querying previous drives
+### Querying previous trips
 
-Once started all drives will be recorded for querying either by date:
+Once started all trips will be recorded for querying either by date:
 
 ```objc
-#import <TLKit/CKContextKit.h>
+#import <TLKit/TLKit.h>
 ...
 
-[self.actMgr queryDrivesFromDate:[NSDate distantPast]
-                          toDate:[NSDate distantFuture]
-                       withLimit:100
-                         toQueue:dispatch_get_main_queue()
-                     withHandler:^(NSArray *drives, NSError *error) {
-                         if (!error) {
-                             NSLog(@"Got drives: %@", drives);
-                         }
-                     }];
+[self.actMgr queryTripsFromDate:[NSDate distantPast]
+                         toDate:[NSDate distantFuture]
+                      withLimit:100
+                        toQueue:dispatch_get_main_queue()
+                    withHandler:^(NSArray *trips, NSError *error) {
+                        if (!error) {
+                            NSLog(@"Got trips: %@", trips);
+                        }
+                    }];
 ```    
 
 or by id:
 
 ```objc    
-NSUUID *driveId = ...;
-[self.actMgr queryDriveById:driveId
-                    toQueue:dispatch_get_main_queue()
-                withHandler:^(NSArray *drives, NSError *err) {
-                    if (!error) {
-                        NSLog(@"Found drive %@", drives[0]);
-                    }
+NSUUID *tripId = ...;
+[self.actMgr queryTripById:tripId
+                   toQueue:dispatch_get_main_queue()
+               withHandler:^(NSArray *trips, NSError *err) {
+                if (!error) {
+                    NSLog(@"Found trip %@", trips[0]);
+                }
                 }];
 ```   
 
 ## Telematics monitoring
 
-Telematics monitoring functionality is accessed through the `CKActivityManager` as well.
-(see Drive monitoring above).
+Telematics monitoring functionality is accessed through the `TLActivityManager` as well.
+(see Trip monitoring above).
 
 ### Registering a telematics event listener
 
@@ -304,7 +352,7 @@ The application can register to receive telematics events as follows.
 ```objc
 [self.actMgr
     listenForTelematicsEventsToQueue:dispatch_get_main_queue()
-                         withHandler:^(CKTelematicsEvent *evt,
+                         withHandler:^(TLTelematicsEvent *evt,
                             NSError *error) {
                             if (error) {
                                 NSLog(@"Telematics event failed with error %@",
@@ -316,8 +364,7 @@ The application can register to receive telematics events as follows.
                         }];
 ```
 
-_Note_: like for the drive monitoring multiple telematics events may be received for the same
-drive.
+_Note_: like for the trips monitoring multiple telematics events may be received for the same trip.
 
 Telematics events can be stopped as follows
 
@@ -325,16 +372,16 @@ Telematics events can be stopped as follows
 [self.actMgr stopListeningForTelematicsEvents];
 ```
 
-### Querying telematics events for a specific drive
+### Querying telematics events for a specific trip
 
-Query telematics events for a specific drive as follows.
+Query telematics events for a specific trip as follows.
 
 ```objc
-#import <TLKit/CKContextKit.h>
+#import <TLKit/TLKit.h>
 ...
-NSUUID *driveId = ...;
+NSUUID *tripId = ...;
 [self.actMgr
-    queryTelematicsEventsForTrip:driveId
+    queryTelematicsEventsForTrip:tripId
                          toQueue:dispatch_get_main_queue()
                      withHandler:^(NSArray *results, NSError *error) {
                          if (error) {
@@ -350,28 +397,29 @@ NSUUID *driveId = ...;
 
 ## Low power location monitoring
 
-`TLKit` provides its own location manager class `CKLocationManager` which
+`TLKit` provides its own location manager class `TLLocationManager` which
 provides low power location monitoring.
 
 Instantiation of the manager is as follows.
 
 ```objc
-#import <TLKit/CKContextKit.h>
+#import <TLKit/TLKit.h>
 ...
-CKLocationManager *locMgr = [CKLocationManager new];
+TLLocationManager *locMgr = TLLocationManager.new;
 ```
 
-### Registering for location updates
+### Listening for location updates
 
 An example of using the manager to receive location updates is provided below.
 
 A listener must be registered to begin receiving location updates as follows:
 
 ```objc
-[locMgr startUpdatingLocationsToQueue:dispatch_get_main_queue()
-                          withHandler:^(CKLocation *location) {
-                              NSLog(@"New location update %@", [location description]);
-                          }
+[locMgr listenForLocationEventsToQueue:dispatch_get_main_queue()
+                           withHandler:^(TLLocation *location) {
+                               NSLog(@"New location update %@", 
+                                  location.description);
+                           } 
                            completion:^(BOOL successful, NSError* error) {
                                if (successful) {
                                    NSLog(@"Started Location updates!");
@@ -382,23 +430,25 @@ A listener must be registered to begin receiving location updates as follows:
 A listener can be unregistered as follows:
 
 ```objc
-[locMgr stopUpdatingLocation];
+[locMgr stopListeningForLocationEvents];
 ```    
 
 
 ### Querying location history
 
-`CKLocationManager` provides the ability to query past locations via
+`TLLLocationManager` provides the ability to query past locations via
 `queryLocations` method. The query locations method can be used as follows:
 
 ```objc    
-[locMgr queryLocationsFromDate:[NSDate distantPast]
-                        toDate:[NSDate distantFuture]
+NSDate *start = ...
+NSDate *end = ...
+[locMgr queryLocationsFromDate:start
+                        toDate:end
                      withLimit:30
                        toQueue:dispatch_get_main_queue()
                    withHandler:^(NSArray *locs, NSError *error ) {
-                       NSLog( @"DB Query Result:" );
-                       for ( id l in locs ) { NSLog(@"%@\n", l); }
+                       NSLog(@"DB Query Result:");
+                       for (id l in locs) { NSLog(@"%@\n", l); }
                    }];
 ```
 
@@ -417,14 +467,7 @@ https://firebase.google.com/docs/crashlytics/get-started
 _Note:_ TLKit is built with bitcode enabled then your app will contain the symbols at compilation time.
 
 ## Out of date TLKit Cocoapod
-Errors like
-```
-No visible @interface for 'CKActivityManager' declares the selector 'stopManualTrip:'
-```
-or
-```
-No known class method for selector 'initAutomaticWithApiKey:authMgr:launchOptions:withResultToQueue:withHandler:'
-```
+
 Your TLKit Cocoapod is out of date it can be updated as follows:
 
 ```bash

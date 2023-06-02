@@ -1,5 +1,5 @@
-/*******************************************************************************
- * Copyright 2016 Tourmaline Labs, Inc. All rights reserved.
+/* *****************************************************************************
+ * Copyright 2023 Tourmaline Labs, Inc. All rights reserved.
  * Confidential & Proprietary - Tourmaline Labs, Inc. ("TLI")
  *
  * The party receiving this software directly from TLI (the "Recipient")
@@ -17,10 +17,18 @@
  * different portions of the software. This notice does not supersede the
  * application of any third party copyright notice to that third party's
  * code.
- ******************************************************************************/
+ * ****************************************************************************/
 
 #import <UIKit/UIKit.h>
+#import <TLKit/TLKit.h>
+
+extern NSString *const TLKitStatusDidChangeNotification;
 
 @interface AppDelegate : UIResponder <UIApplicationDelegate>
 @property (strong, nonatomic) UIWindow *window;
+@property (strong, nonatomic) TLKit *tlkit;
+@property (strong, nonatomic) NSString *authStatus;
++ (AppDelegate *)instance;
+- (void)initTLKit;
+- (void)destroyTLKit;
 @end

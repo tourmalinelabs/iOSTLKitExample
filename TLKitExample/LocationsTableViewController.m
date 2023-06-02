@@ -1,5 +1,5 @@
-/*******************************************************************************
- * Copyright 2016 Tourmaline Labs, Inc. All rights reserved.
+/* *****************************************************************************
+ * Copyright 2023 Tourmaline Labs, Inc. All rights reserved.
  * Confidential & Proprietary - Tourmaline Labs, Inc. ("TLI")
  *
  * The party receiving this software directly from TLI (the "Recipient")
@@ -17,19 +17,19 @@
  * different portions of the software. This notice does not supersede the
  * application of any third party copyright notice to that third party's
  * code.
- ******************************************************************************/
+ * ****************************************************************************/
 
 #import "LocationsTableViewController.h"
 #import "LocationCell.h"
 
-#import <TLKit/CKLocationManager.h>
-#import <TLKit/CKLocation.h>
+#import <TLKit/TLLocationManager.h>
+#import <TLKit/TLLocation.h>
 
 @import SVProgressHUD;
 
 @interface LocationsTableViewController ()
-@property(nonatomic) CKLocationManager     *locationManager;
-@property(nonatomic) NSArray<CKLocation *> *locations;
+@property(nonatomic) TLLocationManager     *locationManager;
+@property(nonatomic) NSArray<TLLocation *> *locations;
 - (void)startLocationsMonitoring;
 - (void)stopLocationsMonitoring;
 - (void)queryLocations;
@@ -61,39 +61,42 @@
     
     // Instantiates CKLocationManager
     NSLog(@"<< Initializing Location Manager >>");
-    self.locationManager = CKLocationManager.new;
+    self.locationManager = TLLocationManager.new;
     
     // Starts monitoring Locations
     NSLog(@"<< Starting Location Monitoring >>");
-    [self.locationManager startUpdatingLocationsToQueue:dispatch_get_main_queue()
-                                            withHandler:^(CKLocation * _Nonnull location) {
-                                                NSLog(@"Location Update: %@", location);
-                                            } completion:^(BOOL successful, NSError * _Nullable error) {
-                                                if (error) {
-                                                    NSLog(@"Failed to start location monitoring with error: %@", error);
-                                                    return;
-                                                }
-                                                NSLog(@"<< Started Location Monitoring >>");
-                                            }];
+    [self.locationManager listenForLocationEventsToQueue:dispatch_get_main_queue()
+                                             withHandler:^(TLLocation * _Nonnull location) {
+        NSLog(@"Location Update: %@", location);
+    } completion:^(BOOL successful, NSError * _Nullable error) {
+        if (error) {
+            NSLog(@"Failed to start location monitoring with error: %@", error);
+            return;
+        }
+        NSLog(@"<< Started Location Monitoring >>");
+    }];
 }
 
 - (void)stopLocationsMonitoring {
     // stop location monitoring
-    [self.locationManager stopUpdatingLocation];
+    [self.locationManager stopListeningForLocationEvents];
     NSLog(@"<< Stopped Location monitoring >>");
 }
 
 - (void)queryLocations {
     // shows progress
     [SVProgressHUD show];
-    
-    __weak __typeof__(self) weakSelf = self;
+
+    NSDate *now = NSDate.date;
+    NSDate *lastWeek = [now dateByAddingTimeInterval:-604800];
+
     // query locations since last week with a limit of max 20 results
-    [self.locationManager queryLocationsFromDate:NSDate.distantPast
-                                          toDate:NSDate.distantFuture
+    __weak __typeof__(self) weakSelf = self;
+    [self.locationManager queryLocationsFromDate:lastWeek
+                                          toDate:now
                                        withLimit:20
                                          toQueue:dispatch_get_main_queue()
-                                     withHandler:^(NSArray<CKLocation *> * _Nullable locations, NSError * _Nullable err) {
+                                     withHandler:^(NSArray<TLLocation *> * _Nullable locations, NSError * _Nullable err) {
                                          // dismiss progress
                                          [SVProgressHUD dismiss];
                                          

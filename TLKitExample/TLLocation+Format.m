@@ -1,5 +1,5 @@
-/*******************************************************************************
- * Copyright 2016 Tourmaline Labs, Inc. All rights reserved.
+/* *****************************************************************************
+ * Copyright 2023 Tourmaline Labs, Inc. All rights reserved.
  * Confidential & Proprietary - Tourmaline Labs, Inc. ("TLI")
  *
  * The party receiving this software directly from TLI (the "Recipient")
@@ -17,24 +17,32 @@
  * different portions of the software. This notice does not supersede the
  * application of any third party copyright notice to that third party's
  * code.
- ******************************************************************************/
+ * ****************************************************************************/
 
-#import <TLKit/CKDrive.h>
+#import "TLLocation+Format.h"
+#import "NSDate+Format.h"
 
-NS_ASSUME_NONNULL_BEGIN
+@implementation TLLocation (Format)
 
-@interface CKDrive (Format)
-- (NSString *)formattedID;
-- (NSString *)formattedType;
-- (NSString *)formattedState;
-- (NSString *)formattedAnalysisState;
-- (NSString *)formattedDistance;
-- (NSString *)formattedStartTime;
-- (NSString *)formattedEndTime;
-- (NSString *)formattedStartLocation;
-- (NSString *)formattedEndLocation;
-- (NSString *)formattedStartAddress;
-- (NSString *)formattedEndAddress;
+- (NSString *)formattedLocation {
+    return [NSString stringWithFormat:@"Location: %f, %f",
+            self.coordinate.latitude,
+            self.coordinate.longitude];
+}
+
+- (NSString *)formattedTime {
+    return [NSString stringWithFormat:@"Start time: %@",
+            [self.timestamp formattedDateTimeWithTimeZone:self.timezone]];
+}
+
+- (NSString *)formattedAddress {
+    return [NSString stringWithFormat:@"Address: %@",
+            self.address.length ? self.address : @"-"];
+}
+
+- (NSString *)formattedState {
+    return [NSString stringWithFormat:@"State: %@",
+            self.activityStateStr];
+}
+
 @end
-
-NS_ASSUME_NONNULL_END

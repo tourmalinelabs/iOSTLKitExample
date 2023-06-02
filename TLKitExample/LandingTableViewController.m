@@ -1,5 +1,5 @@
-/*******************************************************************************
- * Copyright 2016 Tourmaline Labs, Inc. All rights reserved.
+/* *****************************************************************************
+ * Copyright 2023 Tourmaline Labs, Inc. All rights reserved.
  * Confidential & Proprietary - Tourmaline Labs, Inc. ("TLI")
  *
  * The party receiving this software directly from TLI (the "Recipient")
@@ -17,169 +17,109 @@
  * different portions of the software. This notice does not supersede the
  * application of any third party copyright notice to that third party's
  * code.
- ******************************************************************************/
-#import <CommonCrypto/CommonDigest.h>
+ * ****************************************************************************/
+
 #import "LandingTableViewController.h"
-#import "DrivesTableViewController.h"
-#import "CLLocation+Format.h"
+#import "TripsTableViewController.h"
+#import "AppDelegate.h"
+
 #import <CoreLocation/CoreLocation.h>
-#import <TLKit/CKContextKit.h>
-#import <TLKit/CKAuthenticationManagerDelegate.h>
-#import <TLKit/CKDefaultAuth.h>
-#import <TLKit/CKActivityManager.h>
-#import <TLKit/CKTelematicsEvent.h>
+#import "CLLocationManager+TLKit.h"
+#import "CMMotionActivityManager+TLKit.h"
 
-// API Key usually should be kept on server.
-static NSString *const API_KEY  = @"bdf760a8dbf64e35832c47d8d8dffcc0";
-
-// Pre-registered user and password.
-static NSString *const USERNAME = @"iosexample@tourmalinelabs.com";
-
-// used to store the last monitoring mode to user defaults
-static NSString *const MONITORING_MODE_KEY = @"MONITORING_MODE_KEY";
+#import <TLKit/TLKit.h>
 
 @interface LandingTableViewController () <CLLocationManagerDelegate>
-@property (strong, nonatomic) CLLocationManager *clLocationManager;
-@property (assign, nonatomic) CKMonitoringMode mode;
-- (NSString *)monitoringModeString;
-- (void)startTLKit;
-- (void)stopTLKit;
+@property (strong, nonatomic) CLLocationManager *locationManager;
+@property (weak,   nonatomic) id <NSObject> tlkitObserver;
+@property (weak,   nonatomic) id <NSObject> activeObserver;
 @end
 
 @implementation LandingTableViewController
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    
-    NSUserDefaults *standardUserDefaults = NSUserDefaults.standardUserDefaults;
-    [standardUserDefaults registerDefaults:@{ MONITORING_MODE_KEY: @(CKMonitoringModeAutomatic) }];
-    [standardUserDefaults synchronize];
-    
-    self.clLocationManager = CLLocationManager.new;
-    self.clLocationManager.delegate = self;
 
-    if (self.mode != CKMonitoringModeUnmonitored) {
-        [self startTLKit];
-    }
-}
+    self.navigationItem.title = NSBundle.mainBundle.infoDictionary[(NSString *)kCFBundleNameKey];
 
-- (CKMonitoringMode)mode {
-    return [NSUserDefaults.standardUserDefaults integerForKey:MONITORING_MODE_KEY];
-}
+    self.locationManager = CLLocationManager.new;
+    self.locationManager.delegate = self;
 
-- (void)setMode:(CKMonitoringMode)mode {
-    NSUserDefaults *standardUserDefaults = NSUserDefaults.standardUserDefaults;
-    [standardUserDefaults setInteger:mode forKey:MONITORING_MODE_KEY];
-    [standardUserDefaults synchronize];
-}
-
-- (NSString *)monitoringModeString {
-    switch (self.mode) {
-        case CKMonitoringModeAutomatic:
-            return @"Automatic Monitoring";
-        case CKMonitoringModeManual:
-            return @"Manual Monitoring";
-        case CKMonitoringModeUnmonitored:
-            return @"Not monitoring";
-        default:
-            break;
-    }
-    return @"?";
-}
-
-- (void)stopTLKit { 
-    // destroy engine
     __weak __typeof__(self) weakSelf = self;
-    [CKContextKit destroyWithResultToQueue:dispatch_get_main_queue()
-                               withHandler:^(BOOL __unused successful, NSError * _Nullable error) {
-                                   if (error) {
-                                       NSLog(@"Failed to stop TLKit with error: %@", error);
-                                       return;
-                                   }
-                                   [weakSelf.tableView reloadData];
-                               }];
-}
-
-- (NSString *)hashedId:(NSString *)uniqueId {
-    NSData *strData = [uniqueId dataUsingEncoding:NSUTF8StringEncoding];
-    NSMutableData *sha = [NSMutableData dataWithLength:CC_SHA256_DIGEST_LENGTH];
-
-    CC_SHA256(strData.bytes,
-        (unsigned int)strData.length,
-        (unsigned char*)sha.mutableBytes);
-
-    NSMutableString* hexStr = [NSMutableString string];
-
-    [sha enumerateByteRangesUsingBlock:^(const void *bytes, NSRange byteRange, BOOL *stop) {
-        for (NSUInteger i = 0; i < byteRange.length; ++i) {
-            [hexStr appendFormat:@"%02x", ((uint8_t*)bytes)[i]];
-        }
+    NSNotificationCenter *center = NSNotificationCenter.defaultCenter;
+    self.tlkitObserver =
+    [center addObserverForName:TLKitStatusDidChangeNotification
+                                                    object:nil
+                                                     queue:NSOperationQueue.mainQueue
+                                                usingBlock:^(NSNotification * _Nonnull __unused note) {
+        if (!weakSelf) return;
+        [weakSelf.tableView reloadData];
     }];
-    return [hexStr uppercaseString];
 
+    self.activeObserver =
+    [center addObserverForName:UIApplicationDidBecomeActiveNotification
+                        object:nil
+                         queue:NSOperationQueue.mainQueue
+                    usingBlock:^(NSNotification * _Nonnull __unused note) {
+        if (!weakSelf) return;
+        [weakSelf.tableView reloadData];
+    }];
 }
 
-- (void)startTLKit {
-    // check if not already initialized
-    if (CKContextKit.isInitialized) {
-        NSLog(@"TLKit is already started! (mode: %@)",
-            self.monitoringModeString);
-        return;
+- (void)dealloc {
+    NSNotificationCenter *center = NSNotificationCenter.defaultCenter;
+    if (self.tlkitObserver) {
+        [center removeObserver:self.tlkitObserver];
+        self.tlkitObserver = nil;
     }
-
-    NSString* hashedId = [self hashedId:USERNAME];
-    // initializes engine with automatic drive detection
-    __weak __typeof__(self) weakSelf = self;
-    [CKContextKit initWithApiKey:API_KEY
-                        hashedId:hashedId
-                            mode:self.mode
-                        launchOptions:nil
-                    withResultToQueue:dispatch_get_main_queue()
-                          withHandler:^(BOOL __unused successful,
-                              NSError * _Nullable error) {
-                              if (error) {
-                                  NSLog(@"Failed to start TLKit: %@", error);
-                                  return;
-                              }
-                              [weakSelf.tableView reloadData];
-                          }];
+    if (self.activeObserver) {
+        [center removeObserver:self.activeObserver];
+        self.activeObserver = nil;
+    }
 }
 
 #pragma mark - UITableViewDataSource
 
 - (NSInteger)numberOfSectionsInTableView:(UITableView *)tableView {
-    if (CLLocationManager.authorizationStatus != kCLAuthorizationStatusAuthorizedAlways) return 1;
-    return CKContextKit.isInitialized ? 3 : 2;
+    return TLKit.isInitialized ? 3 : 2;
+}
+
+- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
+    NSInteger count = [super tableView:tableView numberOfRowsInSection:section];
+    if (section == 0 && CMMotionActivityManager.isActivityAvailable == NO) {
+        return count - 1;
+    }
+    return count;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     UITableViewCell *cell = [super tableView:tableView cellForRowAtIndexPath:indexPath];
     switch (indexPath.section) {
         case 0: {
-            cell.textLabel.text = CLLocation.formattedAuthorization;
-            CLAuthorizationStatus authorizationStatus = CLLocationManager.authorizationStatus;
-            if (authorizationStatus == kCLAuthorizationStatusNotDetermined ||
-                authorizationStatus == kCLAuthorizationStatusAuthorizedAlways) {
-                cell.selectionStyle = UITableViewCellSelectionStyleNone;
-                cell.accessoryType  = UITableViewCellAccessoryNone;
-            } else {
-                cell.selectionStyle = UITableViewCellSelectionStyleDefault;
-                cell.accessoryType  = UITableViewCellAccessoryDetailButton;
+            switch (indexPath.row) {
+                case 0: {
+                    cell.detailTextLabel.text = self.locationManager.formattedAuthorizationStatus;
+                    cell.detailTextLabel.textColor = self.locationManager.authorizedAlwaysWithFullAccuracy ? UIColor.systemGreenColor : UIColor.systemRedColor;
+                    break;
+                }
+                case 1: {
+                    cell.detailTextLabel.text = CMMotionActivityManager.formattedAuthorizationStatus;
+                    cell.detailTextLabel.textColor = CMMotionActivityManager.authorized ? UIColor.systemGreenColor : UIColor.systemRedColor;
+                    break;
+                }
             }
             break;
         }
         case 1: {
-            BOOL enabled = NO;
-            if (CKContextKit.isInitialized) {
-                enabled = indexPath.row == 0;
+            if (TLKit.isInitialized) {
+                cell.textLabel.text = @"Stop TLKit";
+                cell.textLabel.textColor = UIColor.whiteColor;
+                cell.backgroundColor = UIColor.systemRedColor;
             } else {
-                enabled = indexPath.row != 0;
+                cell.textLabel.text = @"Start TLKit";
+                cell.textLabel.textColor = UIColor.systemBlueColor;
+                cell.backgroundColor = UIColor.whiteColor;
             }
-            cell.textLabel.enabled = enabled;
-            cell.selectionStyle = enabled ? UITableViewCellSelectionStyleDefault : UITableViewCellSelectionStyleNone;
-            break;
-        }
-        case 2: {
             break;
         }
         default:
@@ -190,8 +130,29 @@ static NSString *const MONITORING_MODE_KEY = @"MONITORING_MODE_KEY";
 
 - (NSString *)tableView:(UITableView *)tableView titleForFooterInSection:(NSInteger)section {
     switch (section) {
-        case 0: return CLLocation.formattedAuthorizationDetail;
-        case 1: return [NSString stringWithFormat:@"TLKit state: %@", self.monitoringModeString];
+        case 0: {
+            NSMutableString *footer = NSMutableString.string;
+            NSString *locFooter = self.locationManager.formattedAuthorizationStatusFooter;
+            NSString *motFooter = CMMotionActivityManager.formattedAuthorizationStatusFooter;
+            if (locFooter != nil || motFooter != nil) {
+                [footer appendString:@"TLKit may not work correctly with this permissions:"];
+                if (locFooter.length) {
+                    [footer appendFormat:@"\n• %@", locFooter];
+                }
+                if (motFooter.length) {
+                    [footer appendFormat:@"\n• %@", motFooter];
+                }
+            }
+            return footer;
+        }
+        case 1: {
+            NSString *title = [NSString stringWithFormat:@"Version: %@", TLKit.version];
+            if (TLKit.isInitialized) {
+                title = [title stringByAppendingFormat:@"\nMode: %@\nStatus: %@",
+                         TLKit.modeStr, AppDelegate.instance.authStatus];
+            }
+            return title;
+        }
         default:
             break;
     }
@@ -201,24 +162,13 @@ static NSString *const MONITORING_MODE_KEY = @"MONITORING_MODE_KEY";
 #pragma mark - UITableViewDelegate
 
 - (NSIndexPath *)tableView:(UITableView *)tableView willSelectRowAtIndexPath:(NSIndexPath *)indexPath {
-    switch (indexPath.section) {
-        case 0: {
-            // enable selection when authorization is not always
-            if (CLLocationManager.authorizationStatus == kCLAuthorizationStatusAuthorizedAlways) return nil;
-            break;
+    if (indexPath.section == 0) {
+        if (indexPath.row == 0 && self.locationManager.authorizedAlwaysWithFullAccuracy) {
+            return nil;
         }
-        case 1: {
-            // avoid selecting stop if not initialized or any start if
-            // initialized
-            if (CKContextKit.isInitialized) {
-                if (indexPath.row != 0) return nil;
-            } else {
-                if (indexPath.row == 0) return nil;
-            }
-            break;
+        if (indexPath.row == 1 && CMMotionActivityManager.authorized) {
+            return nil;
         }
-        default:
-            break;
     }
     return indexPath;
 }
@@ -233,40 +183,25 @@ static NSString *const MONITORING_MODE_KEY = @"MONITORING_MODE_KEY";
     [tableView deselectRowAtIndexPath:indexPath animated:YES];
     switch (indexPath.section) {
         case 0: {
-            if (CLLocationManager.authorizationStatus == kCLAuthorizationStatusNotDetermined) {
-                [self requestLocationPermissions];
+            if (indexPath.row == 0 && self.locationManager.authorizationStatus == kCLAuthorizationStatusNotDetermined) {
+                [self.locationManager requestAlwaysAuthorization];
+            } else if (indexPath.row == 1 && CMMotionActivityManager.authorizationStatus == CMAuthorizationStatusNotDetermined) {
+                [CMMotionActivityManager requestAuthorization];
             } else {
                 [self openSettings];
             }
             break;
         }
         case 1: {
-            switch (indexPath.row) {
-                case 0:
-                    self.mode = CKMonitoringModeUnmonitored;
-                    [self stopTLKit];
-                    break;
-                case 1:
-                    self.mode = CKMonitoringModeAutomatic;
-                    [self startTLKit];
-                    break;
-                case 2:
-                    self.mode = CKMonitoringModeManual;
-                    [self startTLKit];
-                    break;
-                default:
-                    break;
+            if (TLKit.isInitialized) {
+                [AppDelegate.instance destroyTLKit];
+            } else {
+                [AppDelegate.instance initTLKit];
             }
             break;
         }
         default:
             break;
-    }
-}
-
-- (void)requestLocationPermissions {
-    if (CLLocationManager.authorizationStatus == kCLAuthorizationStatusNotDetermined) {
-        [self.clLocationManager requestAlwaysAuthorization];
     }
 }
 
@@ -277,16 +212,8 @@ static NSString *const MONITORING_MODE_KEY = @"MONITORING_MODE_KEY";
 
 #pragma mark - CLLocationManagerDelegate
 
-- (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
+- (void)locationManagerDidChangeAuthorization:(CLLocationManager *)manager {
     [self.tableView reloadData];
-}
-
-#pragma mark - Navigation
-
-- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    if ([segue.destinationViewController isKindOfClass:DrivesTableViewController.class]) {
-        ((DrivesTableViewController *)segue.destinationViewController).manual = self.mode == CKMonitoringModeManual;
-    }
 }
 
 @end

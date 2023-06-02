@@ -1,5 +1,5 @@
-/*******************************************************************************
- * Copyright 2016 Tourmaline Labs, Inc. All rights reserved.
+/* *****************************************************************************
+ * Copyright 2023 Tourmaline Labs, Inc. All rights reserved.
  * Confidential & Proprietary - Tourmaline Labs, Inc. ("TLI")
  *
  * The party receiving this software directly from TLI (the "Recipient")
@@ -17,10 +17,10 @@
  * different portions of the software. This notice does not supersede the
  * application of any third party copyright notice to that third party's
  * code.
- ******************************************************************************/
+ * ****************************************************************************/
 
 #import "TelematicsCell.h"
-#import "CKTelematicsEvent+Format.h"
+#import "TLTelematicsEvent+Format.h"
 
 @interface TelematicsCell ()
 // IBOutlets
@@ -39,7 +39,7 @@
     [super awakeFromNib];
 }
 
-- (void)configureCellWithTelematicsEvent:(CKTelematicsEvent *)event {
+- (void)configureCellWithTelematicsEvent:(TLTelematicsEvent *)event {
     self.labelTripId.text     = event.formattedTripID;
     self.labelType.text       = event.formattedType;
     self.labelTime.text       = event.formattedTime;
