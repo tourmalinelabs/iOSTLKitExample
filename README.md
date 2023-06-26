@@ -53,16 +53,15 @@ working from the `.xcworkspace` file that `CocoaPods` automatically creates, not
 
 That's it! You can start coding!
 
-## Option 2: Manual installation
-
-While Cocoapods are the recommended method for Adding `TLKit` to a project it can
-also be adde. This also requires manually adding it's dependent frameworks,
+## Option 2: Manual installation 
+While Cocoapods is the recommended method for Adding `TLKit` to a project it can
+also be added manually. This also requires manually adding it's dependent frameworks,
 configuring linking, and configuring background modes.
 
 ### Adding the TLKit framework
 A zip file containing the framework can be downloaded from
-[here](https://s3.amazonaws.com/tlsdk-ios-stage-frameworks/TLKit-17.4.22032800.zip).
-Once unzipped the file can be added to an existing project by dragging the
+[here](https://s3.amazonaws.com/tlsdk-ios-stage-frameworks/TLKit-22.1.23062602.zip).
+Once unzipped the XCFramework file can be added to an existing project by dragging the
 framework into that project, or following the
 [instructions provided Apple](https://developer.apple.com/library/ios/recipes/xcode_help-structure_navigator/articles/Adding_a_Framework.html).
 
@@ -72,7 +71,7 @@ In project configuration under
 `General > Linked Frameworks and Libraries` add the following
 dependencies
 
-* `TLKit.framework`
+* `TLKit.xcframework`
 * `SystemConfiguration.framework`
 * `CoreMotion.framework`
 * `CoreLocation.framework`
