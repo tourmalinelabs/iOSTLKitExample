@@ -28,10 +28,7 @@
 @import SVProgressHUD;
 
 @interface LocationsTableViewController ()
-@property(nonatomic) TLLocationManager     *locationManager;
 @property(nonatomic) NSArray<TLLocation *> *locations;
-- (void)startLocationsMonitoring;
-- (void)stopLocationsMonitoring;
 - (void)queryLocations;
 @end
 
@@ -42,45 +39,14 @@
 
     // hold the locations
     self.locations = @[];
-    
-    // start monitoring locations
-    [self startLocationsMonitoring];
 
     // query locations
     [self queryLocations];
 }
 
 - (void)dealloc {
-    // stop monitoring locations
-    [self stopLocationsMonitoring];
     // dimiss progress if needed
     [SVProgressHUD dismiss];
-}
-
-- (void)startLocationsMonitoring {
-    
-    // Instantiates CKLocationManager
-    NSLog(@"<< Initializing Location Manager >>");
-    self.locationManager = TLLocationManager.new;
-    
-    // Starts monitoring Locations
-    NSLog(@"<< Starting Location Monitoring >>");
-    [self.locationManager listenForLocationEventsToQueue:dispatch_get_main_queue()
-                                             withHandler:^(TLLocation * _Nonnull location) {
-        NSLog(@"Location Update: %@", location);
-    } completion:^(BOOL successful, NSError * _Nullable error) {
-        if (error) {
-            NSLog(@"Failed to start location monitoring with error: %@", error);
-            return;
-        }
-        NSLog(@"<< Started Location Monitoring >>");
-    }];
-}
-
-- (void)stopLocationsMonitoring {
-    // stop location monitoring
-    [self.locationManager stopListeningForLocationEvents];
-    NSLog(@"<< Stopped Location monitoring >>");
 }
 
 - (void)queryLocations {
@@ -89,30 +55,30 @@
 
     NSDate *now = NSDate.date;
     NSDate *lastWeek = [now dateByAddingTimeInterval:-604800];
-
+    
     // query locations since last week with a limit of max 20 results
     __weak __typeof__(self) weakSelf = self;
-    [self.locationManager queryLocationsFromDate:lastWeek
-                                          toDate:now
-                                       withLimit:20
-                                         toQueue:dispatch_get_main_queue()
-                                     withHandler:^(NSArray<TLLocation *> * _Nullable locations, NSError * _Nullable err) {
-                                         // dismiss progress
-                                         [SVProgressHUD dismiss];
-                                         
-                                         // handle error
-                                         if (err) {
-                                             NSLog(@"Query Locations failed with error: %@", err);
-                                             return;
-                                         }
-                                         NSLog(@"Query Locations result: %@", locations);
-                                         
-                                         if (!weakSelf) return;
-                                         
-                                         // updates the ui
-                                         weakSelf.locations = locations;
-                                         [weakSelf.tableView reloadData];
-                                     }];
+    [TLLocationManager.new queryLocationsFromDate:lastWeek
+                                           toDate:now
+                                        withLimit:20
+                                          toQueue:dispatch_get_main_queue()
+                                      withHandler:^(NSArray<TLLocation *> * _Nullable locations, NSError * _Nullable err) {
+        // dismiss progress
+        [SVProgressHUD dismiss];
+        
+        // handle error
+        if (err) {
+            NSLog(@"Query Locations failed with error: %@", err);
+            return;
+        }
+        NSLog(@"Query Locations result: %@", locations);
+        
+        if (!weakSelf) return;
+        
+        // updates the ui
+        weakSelf.locations = locations;
+        [weakSelf.tableView reloadData];
+    }];
 }
 
 #pragma mark - Table view data source

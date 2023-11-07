@@ -37,6 +37,9 @@ static NSString *const SHOULD_RESTART_TLKIT_AT_LAUNCH_KEY = @"SHOULD_RESTART_TLK
 @interface AppDelegate ()
 @property (assign, nonatomic) BOOL shouldRestartTLKitAtLaunch;
 @property (strong, nonatomic) NSDictionary *launchOptions;
+@property (strong, nonatomic) TLLocationManager *locationManager;
+- (void)startLocationsMonitoring;
+- (void)stopLocationsMonitoring;
 @end
 
 @implementation AppDelegate
@@ -154,6 +157,7 @@ static NSString *const SHOULD_RESTART_TLKIT_AT_LAUNCH_KEY = @"SHOULD_RESTART_TLK
         weakSelf.shouldRestartTLKitAtLaunch = YES;
         [NSNotificationCenter.defaultCenter
          postNotificationName:TLKitStatusDidChangeNotification object:nil];
+        [weakSelf startLocationsMonitoring];
     }];
 }
 
@@ -170,7 +174,34 @@ static NSString *const SHOULD_RESTART_TLKIT_AT_LAUNCH_KEY = @"SHOULD_RESTART_TLK
         weakSelf.authStatus = @"NOT AUTHENTICATED";
         [NSNotificationCenter.defaultCenter
          postNotificationName:TLKitStatusDidChangeNotification object:nil];
+        [weakSelf stopLocationsMonitoring];
     }];
+}
+
+- (void)startLocationsMonitoring {
+    
+    // Instantiates CKLocationManager
+    NSLog(@"<< Initializing Location Manager >>");
+    self.locationManager = TLLocationManager.new;
+    
+    // Starts monitoring Locations
+    NSLog(@"<< Starting Location Monitoring >>");
+    [self.locationManager listenForLocationEventsToQueue:dispatch_get_main_queue()
+                                             withHandler:^(TLLocation * _Nonnull location) {
+        NSLog(@"Location Update: %@", location);
+    } completion:^(BOOL successful, NSError * _Nullable error) {
+        if (error) {
+            NSLog(@"Failed to start location monitoring with error: %@", error);
+            return;
+        }
+        NSLog(@"<< Started Location Monitoring >>");
+    }];
+}
+
+- (void)stopLocationsMonitoring {
+    // stop location monitoring
+    [self.locationManager stopListeningForLocationEvents];
+    NSLog(@"<< Stopped Location monitoring >>");
 }
 
 @end
