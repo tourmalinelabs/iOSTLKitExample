@@ -28,9 +28,6 @@ NSString *const TLKitStatusDidChangeNotification = @"TLKitStatusDidChangeNotific
 // API Key usually should be kept on server.
 static NSString *const API_KEY = @"bdf760a8dbf64e35832c47d8d8dffcc0";
 
-// Pre-registered user.
-static NSString *const USERNAME = @"iosexample@tourmalinelabs.com";
-
 // used to store if TLKit was started to user defaults
 static NSString *const SHOULD_RESTART_TLKIT_AT_LAUNCH_KEY = @"SHOULD_RESTART_TLKIT_AT_LAUNCH_KEY";
 
@@ -38,8 +35,8 @@ static NSString *const SHOULD_RESTART_TLKIT_AT_LAUNCH_KEY = @"SHOULD_RESTART_TLK
 @property (assign, nonatomic) BOOL shouldRestartTLKitAtLaunch;
 @property (strong, nonatomic) NSDictionary *launchOptions;
 @property (strong, nonatomic) TLLocationManager *locationManager;
-- (void)startLocationsMonitoring;
-- (void)stopLocationsMonitoring;
+@property (strong, nonatomic) TLAuthenticationStatusHandler tlkitAuthHandler;
+@property (strong, nonatomic) TLCompletionHandler tlkitCompletionHandler;
 @end
 
 @implementation AppDelegate
@@ -58,23 +55,6 @@ static NSString *const SHOULD_RESTART_TLKIT_AT_LAUNCH_KEY = @"SHOULD_RESTART_TLK
 }
 
 #pragma mark -
-
-- (NSString *)hashedId:(NSString *)uniqueId {
-    NSData *strData = [uniqueId dataUsingEncoding:NSUTF8StringEncoding];
-    NSMutableData *sha = [NSMutableData dataWithLength:CC_SHA256_DIGEST_LENGTH];
-
-    CC_SHA256(strData.bytes,
-              (unsigned int)strData.length,
-              (unsigned char *)sha.mutableBytes);
-
-    NSMutableString *hexStr = NSMutableString.string;
-    [sha enumerateByteRangesUsingBlock:^(const void *bytes, NSRange byteRange, BOOL *stop) {
-        for (NSUInteger i = 0; i < byteRange.length; ++i) {
-            [hexStr appendFormat:@"%02x", ((uint8_t *)bytes)[i]];
-        }
-    }];
-    return hexStr.uppercaseString;
-}
 
 - (BOOL)shouldRestartTLKitAtLaunch {
     return [NSUserDefaults.standardUserDefaults boolForKey:SHOULD_RESTART_TLKIT_AT_LAUNCH_KEY];
@@ -95,7 +75,7 @@ static NSString *const SHOULD_RESTART_TLKIT_AT_LAUNCH_KEY = @"SHOULD_RESTART_TLK
 
     // authentication status handler
     __weak __typeof__(self) weakSelf = self;
-    TLAuthenticationStatusHandler authHandler = ^(TLAuthenticationStatus status, NSError *_Nullable error) {
+    self.tlkitAuthHandler = ^(TLAuthenticationStatus status, NSError *_Nullable error) {
         if (!weakSelf) return;
         switch (status) {
             case TLAuthenticationStatusNone:
@@ -127,28 +107,8 @@ static NSString *const SHOULD_RESTART_TLKIT_AT_LAUNCH_KEY = @"SHOULD_RESTART_TLK
         [NSNotificationCenter.defaultCenter
          postNotificationName:TLKitStatusDidChangeNotification object:nil];
     };
-
-    NSMutableDictionary *launchOptions = NSMutableDictionary.dictionary;
-    if (self.launchOptions) { // from application:didFinishLaunchingWithOptions
-        launchOptions[TLAppDelegateLaunchOptionsKey] = self.launchOptions;
-    }
-
-    TLLaunchOptions *options = TLLaunchOptions.new;
-    options.firstname = @"Bob";
-    options.lastname = @"Smith";
-    //options.externalId = @"my-company-identifier-xyz";
-    //[options addGroupExternalIds:@[@"team_blue", @"team_green"] toOrgId:123];
-    launchOptions[TLLaunchOptionsKey] = options;
-
-    // TLKit initialization
-    [TLKit initWithApiKey:API_KEY
-                     area:TLCloudAreaUS
-                 hashedId:[TLDigest sha256:USERNAME]
-              authHandler:authHandler
-                     mode:TLMonitoringModeAutomatic
-            launchOptions:launchOptions.copy
-        withResultToQueue:nil // defaults to main queue
-              withHandler:^(BOOL successful, NSError * _Nullable error) {
+    
+    self.tlkitCompletionHandler = ^(BOOL successful, NSError *_Nullable error) {
         if (error) {
             NSLog(@"Failed to start TLKit: %@", error);
             // handle error...
@@ -158,7 +118,124 @@ static NSString *const SHOULD_RESTART_TLKIT_AT_LAUNCH_KEY = @"SHOULD_RESTART_TLK
         [NSNotificationCenter.defaultCenter
          postNotificationName:TLKitStatusDidChangeNotification object:nil];
         [weakSelf startLocationsMonitoring];
-    }];
+    };
+
+    [self initTLKitWithHashedIdJoinGroup];
+//    [self initTLKitWithHashedIdJoinGroupAndSetVehicle];
+//    [self initTLKitForDriverInstanceWithHashedIdJoinGroupAndSetVehicle];
+//    [self initTLKitWithUsernameAndPassword];
+}
+
+- (void)initTLKitWithHashedIdJoinGroup {
+    NSString *externalId = @"BC-88329";
+    NSString *hashedId   = [TLDigest sha256:externalId];
+    
+    TLLaunchOptions *tlLaunchOptions = TLLaunchOptions.new;
+    tlLaunchOptions.externalId = externalId;
+    [tlLaunchOptions addGroupExternalIds:@[@"team_blue"] toOrgId:123];
+    
+    NSMutableDictionary *launchOptions = NSMutableDictionary.dictionary;
+    launchOptions[TLLaunchOptionsKey] = tlLaunchOptions;
+    
+    if (self.launchOptions) { // from application:didFinishLaunchingWithOptions
+        launchOptions[TLAppDelegateLaunchOptionsKey] = self.launchOptions;
+    }
+
+    // TLKit initialization
+    [TLKit initWithApiKey:API_KEY
+                     area:TLCloudAreaUS
+                 hashedId:hashedId
+              authHandler:self.tlkitAuthHandler
+                     mode:TLMonitoringModeAutomatic
+            launchOptions:launchOptions.copy
+        withResultToQueue:dispatch_get_main_queue()
+              withHandler:self.tlkitCompletionHandler];
+}
+
+- (void)initTLKitWithHashedIdJoinGroupAndSetVehicle {
+    NSString *externalId = @"BC-88329";
+    NSString *hashedId   = [TLDigest sha256:externalId];
+    
+    TLLaunchOptions *tlLaunchOptions = TLLaunchOptions.new;
+    tlLaunchOptions.externalId = externalId;
+    [tlLaunchOptions addGroupExternalIds:@[@"team_blue"] toOrgId:123];
+    [tlLaunchOptions setVehicleWithExternalId:@"vehicle-identifier-xyz"
+                              andLicensePlate:@"231-4R-12"];
+    
+    NSMutableDictionary *launchOptions = NSMutableDictionary.dictionary;
+    launchOptions[TLLaunchOptionsKey] = tlLaunchOptions;
+    
+    if (self.launchOptions) { // from application:didFinishLaunchingWithOptions
+        launchOptions[TLAppDelegateLaunchOptionsKey] = self.launchOptions;
+    }
+
+    // TLKit initialization
+    [TLKit initWithApiKey:API_KEY
+                     area:TLCloudAreaUS
+                 hashedId:hashedId
+              authHandler:self.tlkitAuthHandler
+                     mode:TLMonitoringModeAutomatic
+            launchOptions:launchOptions.copy
+        withResultToQueue:dispatch_get_main_queue()
+              withHandler:self.tlkitCompletionHandler];
+}
+
+- (void)initTLKitForDriverInstanceWithHashedIdJoinGroupAndSetVehicle {
+    
+    NSString *groupExternalId = @"B424";
+    NSString *externalId = [NSString stringWithFormat:@"BC-%@-88329", groupExternalId];
+    NSString *hashedId   = [TLDigest sha256:externalId];
+    
+    TLLaunchOptions *tlLaunchOptions = TLLaunchOptions.new;
+    tlLaunchOptions.externalId = externalId;
+    [tlLaunchOptions addGroupExternalIds:@[groupExternalId] toOrgId:123];
+    [tlLaunchOptions setVehicleWithExternalId:@"vehicle-identifier-xyz"
+                              andLicensePlate:@"231-4R-12"];
+    
+    NSMutableDictionary *launchOptions = NSMutableDictionary.dictionary;
+    launchOptions[TLLaunchOptionsKey] = tlLaunchOptions;
+        
+    if (self.launchOptions) { // from application:didFinishLaunchingWithOptions
+        launchOptions[TLAppDelegateLaunchOptionsKey] = self.launchOptions;
+    }
+
+    // TLKit initialization
+    [TLKit initWithApiKey:API_KEY
+                     area:TLCloudAreaUS
+                 hashedId:hashedId
+              authHandler:self.tlkitAuthHandler
+                     mode:TLMonitoringModeAutomatic
+            launchOptions:launchOptions.copy
+        withResultToQueue:dispatch_get_main_queue()
+              withHandler:self.tlkitCompletionHandler];
+}
+
+- (void)initTLKitWithUsernameAndPassword {
+    
+    NSString *username = @"bob.smith@tourmo.ai";
+    NSString *password = @"qwerty123";
+    
+    TLLaunchOptions *tlLaunchOptions = TLLaunchOptions.new;
+    tlLaunchOptions.firstname = @"Bob";
+    tlLaunchOptions.lastname  = @"Smith";
+    
+    NSMutableDictionary *launchOptions = NSMutableDictionary.dictionary;
+    launchOptions[TLLaunchOptionsKey] = tlLaunchOptions;
+    
+    if (self.launchOptions) { // from application:didFinishLaunchingWithOptions
+        launchOptions[TLAppDelegateLaunchOptionsKey] = self.launchOptions;
+    }
+    
+    // TLKit initialization
+    [TLKit initWithApiKey:API_KEY
+                     area:TLCloudAreaUS
+                 username:username
+                 password:password
+              authHandler:self.tlkitAuthHandler
+                     mode:TLMonitoringModeAutomatic
+            launchOptions:launchOptions.copy
+        withResultToQueue:dispatch_get_main_queue()
+              withHandler:self.tlkitCompletionHandler];
 }
 
 - (void)destroyTLKit {
