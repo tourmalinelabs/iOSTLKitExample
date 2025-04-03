@@ -6,6 +6,9 @@
 build/
 DerivedData/
 
+## Gem Bundle
+vendor/
+
 ## Various settings
 *.pbxuser
 !default.pbxuser
